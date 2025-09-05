@@ -29,7 +29,7 @@ $menu_items = [
 ];
 ?>
 
-<div class="sidebar">
+<div id="sidebar" class="sidebar">
     <div class="sidebar-header">
         <i class="fas fa-chart-pie logo-icon"></i>
         <span class="logo-text">Data Analytics Kependudukan</span>
@@ -40,7 +40,8 @@ $menu_items = [
             <?php foreach ($menu_items as $page_key => $menu_item): ?>
                 <li>
                     <a href="../dashboard/<?php echo $page_key; ?>.php"
-                       class="nav-link <?php echo $menu_item['active'] ? 'active' : ''; ?>">
+   id="nav-<?php echo $page_key; ?>"
+   class="nav-link <?php echo $menu_item['active'] ? 'active' : ''; ?>">
                         <i class="<?php echo $menu_item['icon']; ?>"></i>
                         <span><?php echo $menu_item['label']; ?></span>
                     </a>
@@ -50,7 +51,7 @@ $menu_items = [
 
         <div class="nav-section">
             <h4 class="section-title">Tools</h4>
-            <a href="ai-assistant/" class="nav-link ai-link">
+            <a href="ai-assistant/" id="nav-ai" class="nav-link ai-link">
                 <i class="fas fa-robot"></i>
                 <span>AI Assistant</span>
                 <span class="soon">Soon</span>
