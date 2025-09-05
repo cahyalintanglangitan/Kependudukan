@@ -1,0 +1,377 @@
+/* assets/css/dashboard/disabilitas.css - Specific styles for disabilitas page */
+
+/* Page specific overrides */
+.disabilitas-page {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* Enhanced stat cards for disabilitas */
+.disabilitas-page .stat-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,1) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.disabilitas-page .stat-card::before {
+    height: 5px;
+    background: linear-gradient(90deg, var(--card-color) 0%, rgba(255,255,255,0.2) 100%);
+}
+
+/* Enhanced chart styling */
+.disabilitas-page .chart-card {
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* Special animations for disabilitas data */
+.disabilitas-page .stat-card .value {
+    animation: countUp 1.5s ease-out;
+}
+
+@keyframes countUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Custom legend styling */
+.disabilitas-page .chart-legend {
+    background: rgba(248,249,250,0.8);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.disabilitas-page .legend-item {
+    padding: 5px 10px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.7);
+    transition: background-color 0.3s ease;
+}
+
+.disabilitas-page .legend-item:hover {
+    background: rgba(255,255,255,1);
+}
+
+/* Enhanced loading states */
+.disabilitas-page .loading-spinner {
+    width: 24px;
+    height: 24px;
+    border-width: 3px;
+    border-top-color: var(--card-color, #3498db);
+}
+
+/* Mobile optimizations for disabilitas */
+@media (max-width: 768px) {
+    .disabilitas-page .chart-legend {
+        padding: 10px;
+    }
+    
+    .disabilitas-page .legend-item {
+        font-size: 11px;
+        padding: 3px 8px;
+    }
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+    .disabilitas-page {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    }
+    
+    .disabilitas-page .stat-card {
+        background: rgba(44,62,80,0.9);
+        color: #ecf0f1;
+    }
+    
+    .disabilitas-page .chart-card {
+        background: rgba(44,62,80,0.95);
+        color: #ecf0f1;
+    }
+}
+
+/* Modern Filter Controls - Tambahkan ke assets/css/dashboard/disabilitas.css */
+
+.filter-controls {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 25px 0;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.filter-controls::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+    pointer-events: none;
+}
+
+/* Filter Title */
+.filter-title {
+    width: 100%;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.filter-title i {
+    color: #4facfe;
+    font-size: 18px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+/* Filter Group Container */
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 180px;
+    position: relative;
+    z-index: 1;
+}
+
+.filter-group label {
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    opacity: 0.9;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Modern Select Styling */
+.filter-controls select {
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #2d3748;
+    min-width: 180px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.filter-controls select:hover {
+    background: rgba(255, 255, 255, 1);
+    border-color: rgba(102, 126, 234, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+}
+
+.filter-controls select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2), 0 8px 25px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+}
+
+/* Refresh Button Styling */
+.btn-refresh {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 12px 20px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-height: 44px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-refresh::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-refresh:hover::before {
+    left: 100%;
+}
+
+.btn-refresh:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+}
+
+.btn-refresh:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+}
+
+.btn-refresh i {
+    font-size: 16px;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-refresh:hover i {
+    transform: rotate(180deg);
+}
+
+/* Filter Stats */
+.filter-stats {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #ffffff;
+    font-size: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    white-space: nowrap;
+}
+
+.filter-stats span {
+    font-weight: 700;
+    color: #4facfe;
+}
+
+/* Custom Option Styling */
+.filter-controls select option {
+    background: #ffffff;
+    color: #2d3748;
+    padding: 8px;
+    font-weight: 500;
+}
+
+/* Loading State for Filters */
+.filter-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.filter-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .filter-controls {
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px;
+    }
+    
+    .filter-group {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .filter-controls select {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .btn-refresh {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .filter-title {
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .filter-controls {
+        padding: 16px;
+        margin: 15px 0;
+    }
+    
+    .filter-controls select {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+    
+    .btn-refresh {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+}
+
+/* Integration with existing disabilitas page styles */
+.disabilitas-page .filter-controls {
+    backdrop-filter: blur(15px);
+}
+
+.disabilitas-page .filter-controls select:hover {
+    background: rgba(255, 255, 255, 1);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .filter-controls {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .filter-controls select {
+        background: rgba(44, 62, 80, 0.9);
+        color: #ecf0f1;
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .filter-controls select:hover {
+        background: rgba(44, 62, 80, 1);
+    }
+}
