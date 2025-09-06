@@ -1,0 +1,384 @@
+/* assets/css/dashboard/akta.css - Akta page specific styles */
+
+/* Filter Controls */
+.filter-controls {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  align-items: end;
+}
+
+.filter-title {
+  grid-column: 1 / -1;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 2px solid #ecf0f1;
+  padding-bottom: 10px;
+}
+
+.filter-title i {
+  color: #3498db;
+  font-size: 20px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.filter-group select,
+.filter-group input {
+  padding: 10px 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  color: #2c3e50;
+  transition: all 0.3s ease;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.btn-refresh {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  height: fit-content;
+}
+
+.btn-refresh:hover {
+  background: linear-gradient(135deg, #2980b9, #21618c);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.btn-refresh i {
+  font-size: 12px;
+}
+
+.filter-stats {
+  grid-column: 1 / -1;
+  font-size: 14px;
+  color: #7f8c8d;
+  margin-top: 10px;
+  padding-top: 15px;
+  border-top: 1px solid #ecf0f1;
+  text-align: center;
+}
+
+.filter-stats span {
+  font-weight: 600;
+  color: #3498db;
+}
+
+/* Akta Type Tabs */
+.akta-tabs {
+  background: white;
+  padding: 20px 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+}
+
+.tab-buttons {
+  display: flex;
+  gap: 10px;
+  border-bottom: 2px solid #ecf0f1;
+  margin-bottom: 20px;
+}
+
+.tab-button {
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #7f8c8d;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.tab-button:hover {
+  background: rgba(52, 152, 219, 0.1);
+  color: #3498db;
+}
+
+.tab-button.active {
+  background: #3498db;
+  color: white;
+  font-weight: 600;
+}
+
+.tab-button.active::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #3498db;
+}
+
+/* Akta specific stat cards */
+.stat-card.cerai {
+  --card-color: #e74c3c;
+}
+
+.stat-card.lahir {
+  --card-color: #2ecc71;
+}
+
+.stat-card.mati {
+  --card-color: #34495e;
+}
+
+.stat-card.wajib {
+  --card-color: #f39c12;
+}
+
+.stat-card.memiliki {
+  --card-color: #27ae60;
+}
+
+.stat-card.belum-memiliki {
+  --card-color: #e67e22;
+}
+
+/* Chart specific styles for akta */
+.akta-chart-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+.comparison-chart {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.comparison-chart h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ecf0f1;
+}
+
+/* Data table styles */
+.data-table-container {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.data-table th,
+.data-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.data-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #2c3e50;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.data-table tr:hover {
+  background: rgba(52, 152, 219, 0.05);
+}
+
+.data-table .number {
+  text-align: right;
+  font-family: "Courier New", monospace;
+  font-weight: 500;
+}
+
+.data-table .percentage {
+  text-align: center;
+  font-weight: 600;
+}
+
+.percentage.high {
+  color: #27ae60;
+}
+
+.percentage.medium {
+  color: #f39c12;
+}
+
+.percentage.low {
+  color: #e74c3c;
+}
+
+/* Loading states */
+.tab-content {
+  min-height: 200px;
+  position: relative;
+}
+
+.tab-content.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-content.loading::before {
+  content: "";
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .akta-chart-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .filter-controls {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 20px;
+  }
+
+  .tab-buttons {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .tab-button {
+    border-radius: 8px;
+    text-align: center;
+  }
+
+  .tab-button.active::after {
+    display: none;
+  }
+
+  .data-table-container {
+    padding: 15px;
+  }
+
+  .data-table {
+    font-size: 12px;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 8px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .akta-tabs {
+    padding: 15px;
+  }
+
+  .comparison-chart {
+    padding: 20px;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+}
+
+/* Animation for smooth transitions */
+.tab-content {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+}
+
+.tab-content.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Export button */
+.export-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  justify-content: flex-end;
+}
+
+.btn-export {
+  background: linear-gradient(135deg, #27ae60, #229954);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+}
+
+.btn-export:hover {
+  background: linear-gradient(135deg, #229954, #1e8449);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(39, 174, 96, 0.3);
+}

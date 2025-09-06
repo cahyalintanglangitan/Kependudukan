@@ -1,0 +1,31 @@
+▮ Untitled Project
+├─▮ api
+│  ├─▯ akta.php
+│  ├─▯ demografi.php
+│  └─▯ disabilitas.php
+├─▮ assets
+│  ├─▮ css
+│  │  ├─▮ dashboard
+│  │  │  ├─▯ akta.css
+│  │  │  └─▯ disabilitas.css
+│  │  └─▯ style.css
+│  └─▮ js
+│     ├─▯ api.js
+│     ├─▮ dashboard
+│     │  ├─▯ common.js
+│     │  └─▯ disabilitas.js
+│     ├─▯ main.js
+│     └─▯ sidebar.js
+├─▯ buat_struktur.py
+├─▮ config
+│  ├─▯ config.php
+│  └─▯ database.php
+├─▮ includes
+│  └─▯ sidebar.php
+├─▯ index.php
+├─▯ kependudukan.sql
+├─▮ pages
+│  └─▮ dashboard
+│     ├─▯ akta.php
+│     └─▯ disabilitas.php
+└─▯ test_connection.php
