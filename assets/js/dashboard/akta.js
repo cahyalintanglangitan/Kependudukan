@@ -20,6 +20,11 @@ class AktaDashboard {
     this.allProvinces = []
     this.activeTab = "akta_cerai"
     this.charts = {}
+    this.pagination = {
+      currentPage: 1,
+      itemsPerPage: 25,
+      totalItems: 0,
+    }
 
     this.init()
   }
@@ -72,8 +77,18 @@ class AktaDashboard {
     // Update tab content
     document.querySelectorAll(".tab-content").forEach((content) => {
       content.classList.remove("active")
+      content.style.display = "none"
     })
-    document.getElementById(`${tabType}-content`).classList.add("active")
+
+    // Show only the active tab
+    const activeTabContent = document.getElementById(`${tabType}-content`)
+    if (activeTabContent) {
+      activeTabContent.style.display = "block"
+      // Use setTimeout to ensure display change takes effect before adding active class
+      setTimeout(() => {
+        activeTabContent.classList.add("active")
+      }, 10)
+    }
 
     // Update stats and charts for active tab
     this.updateTabContent()
@@ -106,11 +121,13 @@ class AktaDashboard {
 
         // Show success notification
         if (window.mainApp && window.mainApp.showNotification) {
-          const totalRecords = Object.values(this.currentData).reduce(
-            (sum, data) => sum + (Array.isArray(data) ? data.length : 0),
-            0,
+          const activeTabData = this.currentData[this.activeTab] || []
+          const activeTabCount = Array.isArray(activeTabData) ? activeTabData.length : 0
+          window.mainApp.showNotification(
+            `Data berhasil dimuat: ${activeTabCount} record untuk ${this.activeTab.replace("_", " ")}`,
+            "success",
+            3000,
           )
-          window.mainApp.showNotification(`Data berhasil dimuat: ${totalRecords} record`, "success", 3000)
         }
 
         console.log("Akta data loaded:", this.currentData)
@@ -184,10 +201,9 @@ class AktaDashboard {
   updateDataCounter() {
     const counterElement = document.getElementById("dataCount")
     if (counterElement) {
-      const totalCount = Object.values(this.currentData).reduce((sum, data) => {
-        return sum + (Array.isArray(data) ? data.length : 0)
-      }, 0)
-      counterElement.textContent = totalCount.toLocaleString("id-ID")
+      const activeTabData = this.currentData[this.activeTab]
+      const activeTabCount = Array.isArray(activeTabData) ? activeTabData.length : 0
+      counterElement.textContent = activeTabCount.toLocaleString("id-ID")
     }
   }
 
@@ -195,8 +211,7 @@ class AktaDashboard {
     // Update stats for active tab
     this.updateTabStats()
 
-    // Create charts for active tab
-    setTimeout(() => this.createTabCharts(), 100)
+    setTimeout(() => this.createRealCharts(), 150)
 
     // Update data table
     this.updateDataTable()
@@ -256,7 +271,7 @@ class AktaDashboard {
     }
   }
 
-  createTabCharts() {
+  createRealCharts() {
     if (typeof window.Chart === "undefined") {
       console.error("Chart.js not loaded")
       return
@@ -273,23 +288,53 @@ class AktaDashboard {
       return
     }
 
-    // Create bar chart
-    this.createBarChart(tabData)
-
-    // Create pie chart
-    this.createPieChart(tabData)
+    // Create only real charts based on database data
+    this.createWilayahDistributionChart(tabData)
+    this.createKepemilikanOverviewChart(tabData)
   }
 
-  createBarChart(data) {
+  createWilayahDistributionChart(data) {
     const canvas = document.getElementById(`${this.activeTab}-bar-chart`)
     if (!canvas) return
 
     const ctx = canvas.getContext("2d")
-    const chartData = data.slice(0, 15) // Limit to 15 items
 
-    let datasets = []
+    let chartData, datasets
+
+    const sortBy = document.getElementById("sortBy")?.value || "wilayah"
+    const sortOrder = document.getElementById("sortOrder")?.value || "asc"
 
     if (this.activeTab === "akta_mati") {
+      // Sort data based on current filter settings
+      chartData = [...data]
+        .sort((a, b) => {
+          let aVal, bVal
+          switch (sortBy) {
+            case "laki_laki":
+              aVal = a.laki_laki || 0
+              bVal = b.laki_laki || 0
+              break
+            case "perempuan":
+              aVal = a.perempuan || 0
+              bVal = b.perempuan || 0
+              break
+            case "total":
+              aVal = a.total || 0
+              bVal = b.total || 0
+              break
+            default:
+              aVal = a.wilayah || ""
+              bVal = b.wilayah || ""
+          }
+
+          if (typeof aVal === "string") {
+            return sortOrder === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+          } else {
+            return sortOrder === "asc" ? aVal - bVal : bVal - aVal
+          }
+        })
+        .slice(0, 10)
+
       datasets = [
         {
           label: "Laki-laki",
@@ -305,6 +350,40 @@ class AktaDashboard {
         },
       ]
     } else {
+      // Sort data based on current filter settings
+      chartData = [...data]
+        .sort((a, b) => {
+          let aVal, bVal
+          switch (sortBy) {
+            case "wajib":
+              aVal = a.wajib || 0
+              bVal = b.wajib || 0
+              break
+            case "memiliki":
+              aVal = a.memiliki || 0
+              bVal = b.memiliki || 0
+              break
+            case "belum_memiliki":
+              aVal = a.belum_memiliki || 0
+              bVal = b.belum_memiliki || 0
+              break
+            case "persentase":
+              aVal = a.persentase || 0
+              bVal = b.persentase || 0
+              break
+            default:
+              aVal = a.wilayah || ""
+              bVal = b.wilayah || ""
+          }
+
+          if (typeof aVal === "string") {
+            return sortOrder === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+          } else {
+            return sortOrder === "asc" ? aVal - bVal : bVal - aVal
+          }
+        })
+        .slice(0, 10)
+
       datasets = [
         {
           label: "Memiliki Akta",
@@ -326,7 +405,7 @@ class AktaDashboard {
       data: {
         labels: chartData.map((item) => {
           const cleanName = item.wilayah.replace(/^(KAB\.|KOTA|KABUPATEN|PROVINSI)\s*/i, "")
-          return cleanName.length > 20 ? cleanName.substring(0, 20) + "..." : cleanName
+          return cleanName.length > 15 ? cleanName.substring(0, 15) + "..." : cleanName
         }),
         datasets: datasets,
       },
@@ -367,7 +446,7 @@ class AktaDashboard {
     })
   }
 
-  createPieChart(data) {
+  createKepemilikanOverviewChart(data) {
     const canvas = document.getElementById(`${this.activeTab}-pie-chart`)
     if (!canvas) return
 
@@ -444,6 +523,17 @@ class AktaDashboard {
     })
   }
 
+  showNoDataMessage() {
+    const chartIds = [`${this.activeTab}-bar-chart`, `${this.activeTab}-pie-chart`]
+
+    chartIds.forEach((chartId) => {
+      const canvas = document.getElementById(chartId)
+      if (canvas) {
+        window.DashboardCommon.showNoDataChart(canvas)
+      }
+    })
+  }
+
   updateDataTable() {
     const tableContainer = document.getElementById(`${this.activeTab}-table`)
     if (!tableContainer) return
@@ -454,7 +544,30 @@ class AktaDashboard {
       return
     }
 
-    let tableHTML = '<table class="data-table"><thead><tr>'
+    this.pagination.totalItems = tabData.length
+    const totalPages = Math.ceil(this.pagination.totalItems / this.pagination.itemsPerPage)
+    const startIndex = (this.pagination.currentPage - 1) * this.pagination.itemsPerPage
+    const endIndex = startIndex + this.pagination.itemsPerPage
+    const paginatedData = tabData.slice(startIndex, endIndex)
+
+    let tableHTML = `
+      <div class="table-controls">
+        <div class="per-page-selector">
+          <label for="itemsPerPage">Tampilkan:</label>
+          <select id="itemsPerPage" onchange="window.aktaDashboard.changeItemsPerPage(this.value)">
+            <option value="10" ${this.pagination.itemsPerPage === 10 ? "selected" : ""}>10 data</option>
+            <option value="25" ${this.pagination.itemsPerPage === 25 ? "selected" : ""}>25 data</option>
+            <option value="50" ${this.pagination.itemsPerPage === 50 ? "selected" : ""}>50 data</option>
+            <option value="100" ${this.pagination.itemsPerPage === 100 ? "selected" : ""}>100 data</option>
+          </select>
+        </div>
+        <div class="pagination-info">
+          Menampilkan ${startIndex + 1}-${Math.min(endIndex, this.pagination.totalItems)} dari ${this.pagination.totalItems} data
+        </div>
+      </div>
+    `
+
+    tableHTML += '<table class="data-table"><thead><tr>'
 
     if (this.activeTab === "akta_mati") {
       tableHTML +=
@@ -466,7 +579,7 @@ class AktaDashboard {
 
     tableHTML += "</tr></thead><tbody>"
 
-    tabData.forEach((item) => {
+    paginatedData.forEach((item) => {
       tableHTML += "<tr>"
       tableHTML += `<td>${item.wilayah}</td>`
 
@@ -490,19 +603,42 @@ class AktaDashboard {
     })
 
     tableHTML += "</tbody></table>"
+
+    if (totalPages > 1) {
+      tableHTML += '<div class="pagination-controls">'
+
+      // Previous button
+      if (this.pagination.currentPage > 1) {
+        tableHTML += `<button class="pagination-btn" onclick="window.aktaDashboard.goToPage(${this.pagination.currentPage - 1})">
+          <i class="fas fa-chevron-left"></i> Sebelumnya
+        </button>`
+      }
+
+      // Page numbers
+      const maxVisiblePages = 5
+      let startPage = Math.max(1, this.pagination.currentPage - Math.floor(maxVisiblePages / 2))
+      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
+
+      if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1)
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        const activeClass = i === this.pagination.currentPage ? "active" : ""
+        tableHTML += `<button class="pagination-btn page-number ${activeClass}" onclick="window.aktaDashboard.goToPage(${i})">${i}</button>`
+      }
+
+      // Next button
+      if (this.pagination.currentPage < totalPages) {
+        tableHTML += `<button class="pagination-btn" onclick="window.aktaDashboard.goToPage(${this.pagination.currentPage + 1})">
+          Selanjutnya <i class="fas fa-chevron-right"></i>
+        </button>`
+      }
+
+      tableHTML += "</div>"
+    }
+
     tableContainer.innerHTML = tableHTML
-  }
-
-  showNoDataMessage() {
-    const barCanvas = document.getElementById(`${this.activeTab}-bar-chart`)
-    const pieCanvas = document.getElementById(`${this.activeTab}-pie-chart`)
-
-    if (barCanvas) {
-      window.DashboardCommon.showNoDataChart(barCanvas)
-    }
-    if (pieCanvas) {
-      window.DashboardCommon.showNoDataChart(pieCanvas)
-    }
   }
 
   // Public methods
@@ -516,6 +652,20 @@ class AktaDashboard {
       window.Utils.exportToCSV(activeData, `data-${this.activeTab}`)
     } else {
       console.warn("Export utility not available or no data")
+    }
+  }
+
+  changeItemsPerPage(newItemsPerPage) {
+    this.pagination.itemsPerPage = Number.parseInt(newItemsPerPage)
+    this.pagination.currentPage = 1 // Reset to first page
+    this.updateDataTable()
+  }
+
+  goToPage(pageNumber) {
+    const totalPages = Math.ceil(this.pagination.totalItems / this.pagination.itemsPerPage)
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      this.pagination.currentPage = pageNumber
+      this.updateDataTable()
     }
   }
 }

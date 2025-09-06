@@ -133,16 +133,16 @@
                     <!-- Stats will be populated by JavaScript -->
                 </div>
 
-                <!-- Charts -->
+                <!-- Removed fake charts, keeping only real database-driven charts -->
                 <div class="akta-chart-container">
                     <div class="comparison-chart">
-                        <h3>Distribusi Kepemilikan Akta Cerai</h3>
+                        <h3>Distribusi Kepemilikan Akta Cerai per Wilayah</h3>
                         <div class="chart-container">
                             <canvas id="akta_cerai-bar-chart"></canvas>
                         </div>
                     </div>
                     <div class="comparison-chart">
-                        <h3>Proporsi Kepemilikan</h3>
+                        <h3>Proporsi Kepemilikan Akta Cerai</h3>
                         <div class="chart-container">
                             <canvas id="akta_cerai-pie-chart"></canvas>
                         </div>
@@ -170,16 +170,16 @@
                     <!-- Stats will be populated by JavaScript -->
                 </div>
 
-                <!-- Charts -->
+                <!-- Removed fake charts, keeping only real database-driven charts -->
                 <div class="akta-chart-container">
                     <div class="comparison-chart">
-                        <h3>Distribusi Kepemilikan Akta Lahir</h3>
+                        <h3>Distribusi Kepemilikan Akta Lahir per Wilayah</h3>
                         <div class="chart-container">
                             <canvas id="akta_lahir-bar-chart"></canvas>
                         </div>
                     </div>
                     <div class="comparison-chart">
-                        <h3>Proporsi Kepemilikan</h3>
+                        <h3>Proporsi Kepemilikan Akta Lahir</h3>
                         <div class="chart-container">
                             <canvas id="akta_lahir-pie-chart"></canvas>
                         </div>
@@ -207,7 +207,7 @@
                     <!-- Stats will be populated by JavaScript -->
                 </div>
 
-                <!-- Charts -->
+                <!-- Removed fake charts, keeping only real database-driven charts -->
                 <div class="akta-chart-container">
                     <div class="comparison-chart">
                         <h3>Distribusi Akta Mati per Wilayah</h3>
@@ -216,7 +216,7 @@
                         </div>
                     </div>
                     <div class="comparison-chart">
-                        <h3>Proporsi Berdasarkan Gender</h3>
+                        <h3>Proporsi Berdasarkan Jenis Kelamin</h3>
                         <div class="chart-container">
                             <canvas id="akta_mati-pie-chart"></canvas>
                         </div>

@@ -27,7 +27,6 @@ try {
     $province = isset($_GET['province']) ? $_GET['province'] : 'all';
     $region_type = isset($_GET['region_type']) ? $_GET['region_type'] : 'all';
     $sort_by = isset($_GET['sort_by']) ? $_GET['sort_by'] : 'total_desc';
-    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 50;
 
     $response_data = [];
     $all_stats = [];
@@ -112,7 +111,6 @@ try {
         $sql .= buildRegionFilter($region_type);
         $sql .= buildProvinceFilter($province);
         $sql .= buildSortClause($sort_by, $type);
-        $sql .= " LIMIT " . $limit;
 
         // Execute query
         $stmt = $db->prepare($sql);
@@ -197,8 +195,7 @@ try {
                 'akta_type' => $akta_type,
                 'province' => $province,
                 'region_type' => $region_type,
-                'sort_by' => $sort_by,
-                'limit' => $limit
+                'sort_by' => $sort_by
             ],
             'timestamp' => date('Y-m-d H:i:s')
         ]
