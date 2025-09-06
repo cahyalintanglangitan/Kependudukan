@@ -1,6 +1,6 @@
-/* CSS untuk halaman Kepala Keluarga - Tambahkan ke file style.css yang sudah ada */
+/* assets/css/dashboard/kepala_keluarga.css - Kepala_keluarga page specific styles */
 
-/* Status badges */
+/* Filter Controls */
 .status-badge {
     padding: 4px 8px;
     border-radius: 12px;
