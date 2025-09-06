@@ -1,31 +1,40 @@
-/* assets/css/dashboard/disabilitas.css - Specific styles for disabilitas page */
+/* assets/css/dashboard/demografi.css - Demografi page specific styles */
 
-/* Page specific overrides */
-.disabilitas-page {
-    background:  #ffffff; 
+/* Page theme colors */
+:root {
+    --demografi-primary: #667eea;
+    --demografi-secondary: #764ba2;
+    --demografi-laki: #3498db;
+    --demografi-perempuan: #e91e63;
+    --demografi-accent: #4facfe;
 }
 
-/* Enhanced stat cards for disabilitas */
-.disabilitas-page .stat-card {
+/* Main page background */
+.demografi-page {
+    background: #ffffff; /* Same as disabilitas */
+}
+
+/* Enhanced stat cards for demografi */
+.demografi-page .stat-card {
     background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,1) 100%);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255,255,255,0.2);
 }
 
-.disabilitas-page .stat-card::before {
+.demografi-page .stat-card::before {
     height: 5px;
     background: linear-gradient(90deg, var(--card-color) 0%, rgba(255,255,255,0.2) 100%);
 }
 
 /* Enhanced chart styling */
-.disabilitas-page .chart-card {
+.demografi-page .chart-card {
     background: rgba(255,255,255,0.95);
     backdrop-filter: blur(15px);
     border: 1px solid rgba(255,255,255,0.3);
 }
 
-/* Special animations for disabilitas data */
-.disabilitas-page .stat-card .value {
+/* Special animations for demografi data */
+.demografi-page .stat-card .value {
     animation: countUp 1.5s ease-out;
 }
 
@@ -41,50 +50,48 @@
 }
 
 /* Custom legend styling */
-.disabilitas-page .chart-legend {
+.demografi-page .chart-legend {
     background: rgba(248,249,250,0.8);
     border-radius: 8px;
     padding: 15px;
     margin-bottom: 20px;
 }
 
-.disabilitas-page .legend-item {
+.demografi-page .legend-item {
     padding: 5px 10px;
     border-radius: 20px;
     background: rgba(255,255,255,0.7);
     transition: background-color 0.3s ease;
 }
 
-.disabilitas-page .legend-item:hover {
+.demografi-page .legend-item:hover {
     background: rgba(255,255,255,1);
 }
 
 /* Enhanced loading states */
-.disabilitas-page .loading-spinner {
+.demografi-page .loading-spinner {
     width: 24px;
     height: 24px;
     border-width: 3px;
     border-top-color: var(--card-color, #3498db);
 }
 
-/* Mobile optimizations for disabilitas */
+/* Mobile optimizations for demografi */
 @media (max-width: 768px) {
-    .disabilitas-page .chart-legend {
+    .demografi-page .chart-legend {
         padding: 10px;
     }
     
-    .disabilitas-page .legend-item {
+    .demografi-page .legend-item {
         font-size: 11px;
         padding: 3px 8px;
     }
 }
 
-
-
-/* Modern Filter Controls - Tambahkan ke assets/css/dashboard/disabilitas.css */
+/* Modern Filter Controls - Same as disabilitas */
 
 .filter-controls {
-    background:  #f8f9fa;
+    background: #f8f9fa; /* Light gray background */
     border-radius: 16px;
     padding: 24px;
     margin: 25px 0;
@@ -120,13 +127,11 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    /* Remove text-shadow */
 }
 
 .filter-title i {
     color: #4facfe;
     font-size: 18px;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
 /* Filter Group Container */
@@ -147,9 +152,7 @@
     letter-spacing: 0.5px;
     margin-bottom: 4px;
     opacity: 0.9;
-    /* Remove text-shadow */
 }
-
 
 /* Modern Select Styling */
 .filter-controls select {
@@ -334,12 +337,31 @@
     }
 }
 
-/* Integration with existing disabilitas page styles */
-.disabilitas-page .filter-controls {
+/* Integration with existing demografi page styles */
+.demografi-page .filter-controls {
     backdrop-filter: blur(15px);
 }
 
-.disabilitas-page .filter-controls select:hover {
+.demografi-page .filter-controls select:hover {
     background: rgba(255, 255, 255, 1);
 }
 
+/* Bootstrap compatibility overrides untuk demografi */
+.demografi-page .card {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.demografi-page .border-left-primary {
+    border-left: 4px solid #3498db !important;
+}
+
+.demografi-page .border-left-success {
+    border-left: 4px solid #e91e63 !important;
+}
+
+.demografi-page .border-left-info {
+    border-left: 4px solid #17a2b8 !important;
+}

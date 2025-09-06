@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="../../assets/css/dashboard/disabilitas.css">
 </head>
-<body>
+<body class="disabilitas-page">
     <!-- Include Sidebar -->
     <?php include '../../includes/sidebar.php'; ?>
 
