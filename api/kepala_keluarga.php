@@ -1,271 +1,309 @@
 <?php
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+include '../config/database.php';
 
-// Include database connection
-require_once '../config/database.php';
+// Filter parameters
+$jenis_kk = isset($_GET['jenis_kk']) ? $_GET['jenis_kk'] : '';
+$tipe_wilayah = isset($_GET['tipe_wilayah']) ? $_GET['tipe_wilayah'] : '';
+$pilih_provinsi = isset($_GET['pilih_provinsi']) ? $_GET['pilih_provinsi'] : '';
+$urutan = isset($_GET['urutan']) ? $_GET['urutan'] : 'terbanyak';
 
-// Get action parameter
-$action = $_GET['action'] ?? 'data';
+// Build WHERE clause
+$where_conditions = [];
+$where_clause = "";
 
-try {
-    switch($action) {
-        case 'data':
-            getKepalaKeluargaData();
-            break;
-        case 'stats':
-            getKepalaKeluargaStats();
-            break;
-        case 'chart':
-            getKepalaKeluargaChart();
-            break;
-        case 'gender':
-            getKepalaKeluargaByGender();
-            break;
-        case 'export':
-            exportKepalaKeluargaData();
-            break;
-        default:
-            echo json_encode(['error' => 'Invalid action']);
-            break;
-    }
-} catch(Exception $e) {
-    echo json_encode(['error' => $e->getMessage()]);
-}
-
-// Function to get kepala keluarga data with pagination
-function getKepalaKeluargaData() {
-    global $pdo;
-    
-    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
-    $offset = ($page - 1) * $limit;
-    
-    // Count total records
-    $countQuery = "SELECT COUNT(*) as total FROM kepala_keluarga";
-    $countStmt = $pdo->prepare($countQuery);
-    $countStmt->execute();
-    $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
-    
-    // Get data with pagination
-    $query = "SELECT 
-                kk.id,
-                kk.nama_kepala_keluarga,
-                kk.nik,
-                kk.jenis_kelamin,
-                kk.umur,
-                kk.alamat,
-                kk.rt_rw,
-                kk.kelurahan,
-                kk.kecamatan,
-                kk.jumlah_anggota_keluarga,
-                kk.status_kepala_keluarga,
-                kk.pekerjaan,
-                kk.pendidikan_terakhir,
-                DATE_FORMAT(kk.tanggal_daftar, '%d/%m/%Y') as tanggal_daftar
-              FROM kepala_keluarga kk 
-              ORDER BY kk.nama_kepala_keluarga ASC 
-              LIMIT :limit OFFSET :offset";
-    
-    $stmt = $pdo->prepare($query);
-    $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
-    $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
-    $stmt->execute();
-    
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    echo json_encode([
-        'success' => true,
-        'data' => $data,
-        'pagination' => [
-            'current_page' => $page,
-            'total_pages' => ceil($total / $limit),
-            'total_records' => (int)$total,
-            'per_page' => $limit
-        ]
-    ]);
-}
-
-// Function to get kepala keluarga statistics
-function getKepalaKeluargaStats() {
-    global $pdo;
-    
-    // Total kepala keluarga
-    $totalQuery = "SELECT COUNT(*) as total FROM kepala_keluarga";
-    $totalStmt = $pdo->prepare($totalQuery);
-    $totalStmt->execute();
-    $total = $totalStmt->fetch(PDO::FETCH_ASSOC)['total'];
-    
-    // Status aktif
-    $aktifQuery = "SELECT COUNT(*) as aktif FROM kepala_keluarga WHERE status_kepala_keluarga = 'Aktif'";
-    $aktifStmt = $pdo->prepare($aktifQuery);
-    $aktifStmt->execute();
-    $aktif = $aktifStmt->fetch(PDO::FETCH_ASSOC)['aktif'];
-    
-    // Status tidak aktif
-    $tidakAktifQuery = "SELECT COUNT(*) as tidak_aktif FROM kepala_keluarga WHERE status_kepala_keluarga = 'Tidak Aktif'";
-    $tidakAktifStmt = $pdo->prepare($tidakAktifQuery);
-    $tidakAktifStmt->execute();
-    $tidakAktif = $tidakAktifStmt->fetch(PDO::FETCH_ASSOC)['tidak_aktif'];
-    
-    // Rata-rata jumlah anggota keluarga
-    $avgQuery = "SELECT AVG(jumlah_anggota_keluarga) as rata_rata FROM kepala_keluarga";
-    $avgStmt = $pdo->prepare($avgQuery);
-    $avgStmt->execute();
-    $rataRata = $avgStmt->fetch(PDO::FETCH_ASSOC)['rata_rata'];
-    
-    // Kelompok umur
-    $umurQuery = "SELECT 
-                    CASE 
-                        WHEN umur < 30 THEN 'Dibawah 30'
-                        WHEN umur BETWEEN 30 AND 50 THEN '30-50'
-                        ELSE 'Diatas 50'
-                    END as kelompok_umur,
-                    COUNT(*) as jumlah
-                  FROM kepala_keluarga 
-                  GROUP BY kelompok_umur";
-    $umurStmt = $pdo->prepare($umurQuery);
-    $umurStmt->execute();
-    $kelompokUmur = $umurStmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    echo json_encode([
-        'success' => true,
-        'stats' => [
-            'total_kepala_keluarga' => (int)$total,
-            'status_aktif' => (int)$aktif,
-            'status_tidak_aktif' => (int)$tidakAktif,
-            'rata_rata_anggota' => round($rataRata, 2),
-            'kelompok_umur' => $kelompokUmur
-        ]
-    ]);
-}
-
-// Function to get chart data
-function getKepalaKeluargaChart() {
-    global $pdo;
-    
-    // Data untuk pie chart status
-    $statusQuery = "SELECT 
-                      status_kepala_keluarga as label,
-                      COUNT(*) as value
-                    FROM kepala_keluarga 
-                    GROUP BY status_kepala_keluarga";
-    $statusStmt = $pdo->prepare($statusQuery);
-    $statusStmt->execute();
-    $statusData = $statusStmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Data untuk bar chart pendidikan
-    $pendidikanQuery = "SELECT 
-                          pendidikan_terakhir as label,
-                          COUNT(*) as value
-                        FROM kepala_keluarga 
-                        GROUP BY pendidikan_terakhir
-                        ORDER BY value DESC
-                        LIMIT 10";
-    $pendidikanStmt = $pdo->prepare($pendidikanQuery);
-    $pendidikanStmt->execute();
-    $pendidikanData = $pendidikanStmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Data untuk line chart per bulan (registrasi baru)
-    $bulanQuery = "SELECT 
-                     DATE_FORMAT(tanggal_daftar, '%Y-%m') as bulan,
-                     COUNT(*) as jumlah
-                   FROM kepala_keluarga 
-                   WHERE tanggal_daftar >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
-                   GROUP BY DATE_FORMAT(tanggal_daftar, '%Y-%m')
-                   ORDER BY bulan ASC";
-    $bulanStmt = $pdo->prepare($bulanQuery);
-    $bulanStmt->execute();
-    $trendData = $bulanStmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    echo json_encode([
-        'success' => true,
-        'charts' => [
-            'status_pie' => $statusData,
-            'pendidikan_bar' => $pendidikanData,
-            'trend_line' => $trendData
-        ]
-    ]);
-}
-
-// Function to get data by gender
-function getKepalaKeluargaByGender() {
-    global $pdo;
-    
-    $genderQuery = "SELECT 
-                      jenis_kelamin,
-                      COUNT(*) as jumlah,
-                      AVG(umur) as rata_rata_umur,
-                      AVG(jumlah_anggota_keluarga) as rata_rata_anggota
-                    FROM kepala_keluarga 
-                    GROUP BY jenis_kelamin";
-    
-    $stmt = $pdo->prepare($genderQuery);
-    $stmt->execute();
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    echo json_encode([
-        'success' => true,
-        'data' => $data
-    ]);
-}
-
-// Function to export data
-function exportKepalaKeluargaData() {
-    global $pdo;
-    
-    $format = $_GET['format'] ?? 'json';
-    
-    $query = "SELECT 
-                kk.nama_kepala_keluarga,
-                kk.nik,
-                kk.jenis_kelamin,
-                kk.umur,
-                kk.alamat,
-                kk.rt_rw,
-                kk.kelurahan,
-                kk.kecamatan,
-                kk.jumlah_anggota_keluarga,
-                kk.status_kepala_keluarga,
-                kk.pekerjaan,
-                kk.pendidikan_terakhir,
-                DATE_FORMAT(kk.tanggal_daftar, '%d/%m/%Y') as tanggal_daftar
-              FROM kepala_keluarga kk 
-              ORDER BY kk.nama_kepala_keluarga ASC";
-    
-    $stmt = $pdo->prepare($query);
-    $stmt->execute();
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    if ($format === 'csv') {
-        header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="kepala_keluarga_' . date('Y-m-d') . '.csv"');
-        
-        $output = fopen('php://output', 'w');
-        
-        // Header CSV
-        fputcsv($output, [
-            'Nama Kepala Keluarga', 'NIK', 'Jenis Kelamin', 'Umur', 'Alamat', 
-            'RT/RW', 'Kelurahan', 'Kecamatan', 'Jumlah Anggota', 'Status', 
-            'Pekerjaan', 'Pendidikan', 'Tanggal Daftar'
-        ]);
-        
-        // Data CSV
-        foreach ($data as $row) {
-            fputcsv($output, $row);
-        }
-        
-        fclose($output);
-    } else {
-        // Default JSON format
-        echo json_encode([
-            'success' => true,
-            'data' => $data,
-            'total' => count($data),
-            'exported_at' => date('Y-m-d H:i:s')
-        ]);
+if (!empty($jenis_kk)) {
+    if ($jenis_kk === 'laki') {
+        $where_conditions[] = "kk.jenis_kelamin = 'L'";
+    } elseif ($jenis_kk === 'perempuan') {
+        $where_conditions[] = "kk.jenis_kelamin = 'P'";
     }
 }
+
+if (!empty($pilih_provinsi)) {
+    $where_conditions[] = "kw.KODE_WILAYAH LIKE '" . mysqli_real_escape_string($conn, $pilih_provinsi) . "%'";
+}
+
+if (!empty($where_conditions)) {
+    $where_clause = "WHERE " . implode(" AND ", $where_conditions);
+}
+
+// Order clause
+$order_clause = $urutan === 'tersedikit' ? 'ASC' : 'DESC';
+
+// Query untuk mendapatkan data kepala keluarga per wilayah
+$query = "SELECT 
+    kw.NAMA_WILAYAH as wilayah,
+    COUNT(kk.id) as total_kk,
+    SUM(CASE WHEN kk.jenis_kelamin = 'L' THEN 1 ELSE 0 END) as laki_laki,
+    SUM(CASE WHEN kk.jenis_kelamin = 'P' THEN 1 ELSE 0 END) as perempuan,
+    ROUND((SUM(CASE WHEN kk.jenis_kelamin = 'L' THEN 1 ELSE 0 END) / COUNT(kk.id) * 100), 0) as persentase_laki
+FROM kepala_keluarga kk 
+JOIN kode_wilayah kw ON kk.kode_wilayah = kw.KODE_WILAYAH 
+$where_clause
+GROUP BY kw.KODE_WILAYAH, kw.NAMA_WILAYAH
+ORDER BY COUNT(kk.id) $order_clause";
+
+$result = mysqli_query($conn, $query);
+
+// Count total records
+$count_query = "SELECT COUNT(DISTINCT kw.KODE_WILAYAH) as total_records
+FROM kepala_keluarga kk 
+JOIN kode_wilayah kw ON kk.kode_wilayah = kw.KODE_WILAYAH 
+$where_clause";
+$count_result = mysqli_query($conn, $count_query);
+$total_records = mysqli_fetch_assoc($count_result)['total_records'];
+
+// Summary totals
+$total_query = "SELECT 
+    COUNT(*) as total_kk,
+    SUM(CASE WHEN jenis_kelamin = 'L' THEN 1 ELSE 0 END) as total_laki,
+    SUM(CASE WHEN jenis_kelamin = 'P' THEN 1 ELSE 0 END) as total_perempuan
+FROM kepala_keluarga kk
+JOIN kode_wilayah kw ON kk.kode_wilayah = kw.KODE_WILAYAH
+$where_clause";
+
+$total_result = mysqli_query($conn, $total_query);
+$total_data = mysqli_fetch_assoc($total_result);
 ?>
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Kepala Keluarga - Analytics Kependudukan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/dashboard/style.css" rel="stylesheet">
+    <link href="../assets/css/kepala_keluarga.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <?php include '../includes/sidebar.php'; ?>
+            
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+                    <div>
+                        <h1 class="h2"><i class="fas fa-home me-2"></i>Data Kepala Keluarga</h1>
+                        <p class="text-muted">Distribusi kepala keluarga berdasarkan jenis kelamin dan wilayah</p>
+                    </div>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-filter me-2"></i> Filter Data Kepala Keluarga</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" action="">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label for="jenis_kk" class="form-label">Jenis Kepala Keluarga</label>
+                                    <select class="form-select" id="jenis_kk" name="jenis_kk">
+                                        <option value="">Semua Kepala Keluarga</option>
+                                        <option value="laki" <?php echo $jenis_kk === 'laki' ? 'selected' : ''; ?>>Laki-laki</option>
+                                        <option value="perempuan" <?php echo $jenis_kk === 'perempuan' ? 'selected' : ''; ?>>Perempuan</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="tipe_wilayah" class="form-label">Tipe Wilayah</label>
+                                    <select class="form-select" id="tipe_wilayah" name="tipe_wilayah">
+                                        <option value="">Semua Wilayah</option>
+                                        <option value="kabupaten" <?php echo $tipe_wilayah === 'kabupaten' ? 'selected' : ''; ?>>Kabupaten</option>
+                                        <option value="kota" <?php echo $tipe_wilayah === 'kota' ? 'selected' : ''; ?>>Kota</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="pilih_provinsi" class="form-label">Pilih Provinsi</label>
+                                    <select class="form-select" id="pilih_provinsi" name="pilih_provinsi">
+                                        <option value="">Semua Provinsi</option>
+                                        <?php
+                                        $provinsi_query = "SELECT DISTINCT LEFT(KODE_WILAYAH, 2) as kode_prov, 
+                                                          SUBSTRING_INDEX(NAMA_WILAYAH, ' ', 2) as nama_prov 
+                                                          FROM kode_wilayah 
+                                                          WHERE LENGTH(KODE_WILAYAH) = 4 
+                                                          ORDER BY nama_prov";
+                                        $provinsi_result = mysqli_query($conn, $provinsi_query);
+                                        while($prov = mysqli_fetch_assoc($provinsi_result)) {
+                                            $selected = $pilih_provinsi === $prov['kode_prov'] ? 'selected' : '';
+                                            echo "<option value='{$prov['kode_prov']}' $selected>{$prov['nama_prov']}</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="urutan" class="form-label">Urutkan Berdasarkan</label>
+                                    <select class="form-select" id="urutan" name="urutan">
+                                        <option value="terbanyak" <?php echo $urutan === 'terbanyak' ? 'selected' : ''; ?>>Jumlah Terbanyak</option>
+                                        <option value="tersedikit" <?php echo $urutan === 'tersedikit' ? 'selected' : ''; ?>>Jumlah Tersedikit</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="fas fa-sync me-1"></i> Refresh Data
+                                    </button>
+                                    <a href="?" class="btn btn-secondary">
+                                        <i class="fas fa-undo me-1"></i> Reset Filter
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Summary Section -->
+                <div class="text-end mb-3">
+                    <small class="text-muted">Menampilkan <?php echo $total_records; ?> record</small>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="summary-card gradient-blue">
+                            <div class="card-body text-center text-white">
+                                <div class="summary-icon">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <h6 class="card-subtitle mb-2">TOTAL KK</h6>
+                                <h2 class="mb-0"><?php echo number_format($total_data['total_kk'] ?? 0); ?></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="summary-card gradient-green">
+                            <div class="card-body text-center text-white">
+                                <div class="summary-icon">
+                                    <i class="fas fa-male"></i>
+                                </div>
+                                <h6 class="card-subtitle mb-2">KK LAKI-LAKI</h6>
+                                <h2 class="mb-0"><?php echo number_format($total_data['total_laki'] ?? 0); ?></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="summary-card gradient-red">
+                            <div class="card-body text-center text-white">
+                                <div class="summary-icon">
+                                    <i class="fas fa-female"></i>
+                                </div>
+                                <h6 class="card-subtitle mb-2">KK PEREMPUAN</h6>
+                                <h2 class="mb-0"><?php echo number_format($total_data['total_perempuan'] ?? 0); ?></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="summary-card gradient-purple">
+                            <div class="card-body text-center text-white">
+                                <div class="summary-icon">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                                <h6 class="card-subtitle mb-2">% LAKI-LAKI</h6>
+                                <h2 class="mb-0"><?php echo $total_data['total_kk'] > 0 ? round(($total_data['total_laki'] / $total_data['total_kk']) * 100, 1) : 0; ?>%</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Data Section -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5 class="mb-0"><i class="fas fa-table me-2"></i>Data Kepala Keluarga per Wilayah</h5>
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-success btn-sm" onclick="exportCSV()">
+                                    <i class="fas fa-download me-1"></i> Export CSV
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th><i class="fas fa-map-marker-alt me-1"></i>Wilayah</th>
+                                        <th class="text-center"><i class="fas fa-home me-1"></i>Total KK</th>
+                                        <th class="text-center"><i class="fas fa-male me-1"></i>Laki-laki</th>
+                                        <th class="text-center"><i class="fas fa-female me-1"></i>Perempuan</th>
+                                        <th class="text-center"><i class="fas fa-chart-pie me-1"></i>Persentase</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if(mysqli_num_rows($result) > 0): ?>
+                                        <?php while($row = mysqli_fetch_assoc($result)): ?>
+                                        <tr>
+                                            <td>
+                                                <div class="fw-bold text-dark">
+                                                    <?php echo htmlspecialchars($row['wilayah']); ?>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-primary fs-6 px-3 py-2">
+                                                    <?php echo number_format($row['total_kk']); ?>
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-success fs-6 px-3 py-2">
+                                                    <?php echo number_format($row['laki_laki']); ?>
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-danger fs-6 px-3 py-2">
+                                                    <?php echo number_format($row['perempuan']); ?>
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-flex align-items-center justify-content-center">
+                                                    <span class="badge <?php echo $row['persentase_laki'] > 50 ? 'bg-info' : 'bg-warning'; ?> fs-6 px-3 py-2 me-2">
+                                                        <?php echo $row['persentase_laki']; ?>%
+                                                    </span>
+                                                    <div class="progress" style="width: 80px; height: 10px;">
+                                                        <div class="progress-bar <?php echo $row['persentase_laki'] > 50 ? 'bg-info' : 'bg-warning'; ?>" 
+                                                             style="width: <?php echo $row['persentase_laki']; ?>%"></div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <?php endwhile; ?>
+                                    <?php else: ?>
+                                        <tr>
+                                            <td colspan="5" class="text-center py-5">
+                                                <div class="text-muted">
+                                                    <i class="fas fa-search fa-3x mb-3"></i>
+                                                    <p class="fs-5">Tidak ada data yang ditemukan</p>
+                                                    <p>Coba ubah filter pencarian Anda</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function exportCSV() {
+            const params = new URLSearchParams(window.location.search);
+            window.open(`export_kepala_keluarga.php?${params.toString()}`, '_blank');
+        }
+
+        // Auto-refresh setiap 5 menit
+        setTimeout(() => {
+            location.reload();
+        }, 300000);
+    </script>
+</body>
+</html>
