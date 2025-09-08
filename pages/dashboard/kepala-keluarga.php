@@ -58,6 +58,7 @@ try {
     <title>Data Kepala Keluarga - Data Analytics Kependudukan</title>
     <link href="../../assets/css/style.css" rel="stylesheet">
     <link href="../../assets/css/dashboard/kepala_keluarga.css" rel="stylesheet">
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
