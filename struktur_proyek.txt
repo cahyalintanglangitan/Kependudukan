@@ -3,7 +3,7 @@
 │  ├─▯ akta.php
 │  ├─▯ demografi.php
 │  ├─▯ disabilitas.php
-│  └─▯ kepala_keluarga.php
+│  └─▯ kepala-keluarga.php
 ├─▮ assets
 │  ├─▮ css
 │  │  ├─▮ dashboard
@@ -19,7 +19,7 @@
 │     │  ├─▯ common.js
 │     │  ├─▯ demografi.js
 │     │  ├─▯ disabilitas.js
-│     │  └─▯ kepala_keluarga.js
+│     │  └─▯ kepala-keluarga.js
 │     ├─▯ main.js
 │     └─▯ sidebar.js
 ├─▯ buat_struktur.py
@@ -36,5 +36,5 @@
 │     ├─▯ akta.php
 │     ├─▯ demografi.php
 │     ├─▯ disabilitas.php
-│     └─▯ kepala_keluarga.php
+│     └─▯ kepala-keluarga.php
 └─▯ test_connection.php

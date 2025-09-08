@@ -145,18 +145,18 @@ try {
     $akta_types = ($akta_type === 'all') ? ['akta_cerai', 'akta_lahir', 'akta_mati'] : [$akta_type];
 
     foreach ($akta_types as $type) {
-        // Build base query based on table structure
         if ($type === 'akta_mati') {
-            $sql = "SELECT 
+            $sql = "SELECT DISTINCT
                         `KODE WILAYAH` as kode,
                         `NAMA WILAYAH` as wilayah,
                         `LAKI-LAKI` as laki_laki,
                         `PEREMPUAN` as perempuan,
                         JUMLAH as total
                     FROM {$type} 
-                    WHERE `KODE WILAYAH` IS NOT NULL AND `KODE WILAYAH` != '' AND `NAMA WILAYAH` != 'INDONESIA'";
+                    WHERE `KODE WILAYAH` IS NOT NULL AND `KODE WILAYAH` != '' AND `NAMA WILAYAH` != 'INDONESIA'
+                    GROUP BY `KODE WILAYAH`, `NAMA WILAYAH`";
         } else {
-            $sql = "SELECT 
+            $sql = "SELECT DISTINCT
                         `KODE WILAYAH` as kode,
                         `NAMA WILAYAH` as wilayah,
                         `WAJIB AKTA CERAI` as wajib,
@@ -164,7 +164,8 @@ try {
                         `MEMILIKI AKTA CERAI` as memiliki,
                         `Persentase Kepemilikan` as persentase
                     FROM {$type} 
-                    WHERE `KODE WILAYAH` IS NOT NULL AND `KODE WILAYAH` != '' AND `NAMA WILAYAH` != 'INDONESIA'";
+                    WHERE `KODE WILAYAH` IS NOT NULL AND `KODE WILAYAH` != '' AND `NAMA WILAYAH` != 'INDONESIA'
+                    GROUP BY `KODE WILAYAH`, `NAMA WILAYAH`";
         }
 
         // Add filters
@@ -202,23 +203,32 @@ try {
 
         $response_data[$type] = $processed_data;
 
-        // Calculate statistics
         if ($type === 'akta_mati') {
             $stats_sql = "SELECT 
                             SUM(CAST(REPLACE(REPLACE(`LAKI-LAKI`, ',', ''), '.', '') AS UNSIGNED)) as total_laki_laki,
                             SUM(CAST(REPLACE(REPLACE(PEREMPUAN, ',', ''), '.', '') AS UNSIGNED)) as total_perempuan,
                             SUM(JUMLAH) as grand_total,
-                            COUNT(*) as total_regions
-                          FROM {$type} 
-                          WHERE `KODE WILAYAH` IS NOT NULL AND `KODE WILAYAH` != '' AND `NAMA WILAYAH` != 'INDONESIA'";
+                            COUNT(DISTINCT `KODE WILAYAH`) as total_regions
+                          FROM (
+                              SELECT DISTINCT `KODE WILAYAH`, `NAMA WILAYAH`, `LAKI-LAKI`, PEREMPUAN, JUMLAH
+                              FROM {$type} 
+                              WHERE `KODE WILAYAH` IS NOT NULL AND `KODE WILAYAH` != '' AND `NAMA WILAYAH` != 'INDONESIA'
+                              GROUP BY `KODE WILAYAH`, `NAMA WILAYAH`
+                          ) as unique_data
+                          WHERE 1=1";
         } else {
             $stats_sql = "SELECT 
                             SUM(CAST(REPLACE(REPLACE(`WAJIB AKTA CERAI`, ',', ''), '.', '') AS UNSIGNED)) as total_wajib,
                             SUM(CAST(REPLACE(REPLACE(`BELUM MEMILIKI AKTA CERAI`, ',', ''), '.', '') AS UNSIGNED)) as total_belum_memiliki,
                             SUM(CAST(REPLACE(REPLACE(`MEMILIKI AKTA CERAI`, ',', ''), '.', '') AS UNSIGNED)) as total_memiliki,
-                            COUNT(*) as total_regions
-                          FROM {$type} 
-                          WHERE `KODE WILAYAH` IS NOT NULL AND `KODE WILAYAH` != '' AND `NAMA WILAYAH` != 'INDONESIA'";
+                            COUNT(DISTINCT `KODE WILAYAH`) as total_regions
+                          FROM (
+                              SELECT DISTINCT `KODE WILAYAH`, `NAMA WILAYAH`, `WAJIB AKTA CERAI`, `BELUM MEMILIKI AKTA CERAI`, `MEMILIKI AKTA CERAI`
+                              FROM {$type} 
+                              WHERE `KODE WILAYAH` IS NOT NULL AND `KODE WILAYAH` != '' AND `NAMA WILAYAH` != 'INDONESIA'
+                              GROUP BY `KODE WILAYAH`, `NAMA WILAYAH`
+                          ) as unique_data
+                          WHERE 1=1";
         }
 
         $stats_sql .= buildRegionFilter($region_type);
@@ -231,13 +241,13 @@ try {
         $all_stats[$type] = $stats;
     }
 
-    // Get province breakdown for dropdown
     $province_sql = "SELECT DISTINCT
                         SUBSTRING_INDEX(`KODE WILAYAH`, '.', 1) as kode,
                         `NAMA WILAYAH` as wilayah
                      FROM akta_cerai 
                      WHERE `KODE WILAYAH` REGEXP '^[0-9]{1,2}\\.[0-9]{2}$' 
                      AND `KODE WILAYAH` NOT LIKE '%.%.%'
+                     GROUP BY SUBSTRING_INDEX(`KODE WILAYAH`, '.', 1), `NAMA WILAYAH`
                      ORDER BY `NAMA WILAYAH` ASC";
     
     $province_stmt = $db->prepare($province_sql);

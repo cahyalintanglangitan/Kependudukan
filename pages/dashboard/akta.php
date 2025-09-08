@@ -94,11 +94,33 @@
 
                 <!-- Data Table -->
                 <div class="data-table-container">
-                    <div class="export-controls">
-                        <button class="btn-export" onclick="window.aktaDashboard?.exportData()">
-                            <i class="fas fa-download"></i>
-                            Export CSV
-                        </button>
+                    <!-- Added table controls with sorting and search -->
+                    <div class="table-controls-header">
+                        <div class="search-container">
+                            <label for="akta_cerai-search">Cari:</label>
+                            <input type="text" id="akta_cerai-search" placeholder="Cari wilayah..." class="search-input">
+                        </div>
+                        <div class="sort-container">
+                            <label for="akta_cerai-sort">Urutkan:</label>
+                            <select id="akta_cerai-sort" class="sort-select">
+                                <option value="wilayah_asc">Wilayah A-Z</option>
+                                <option value="wilayah_desc">Wilayah Z-A</option>
+                                <option value="wajib_desc">Wajib Tertinggi</option>
+                                <option value="wajib_asc">Wajib Terendah</option>
+                                <option value="memiliki_desc">Memiliki Tertinggi</option>
+                                <option value="memiliki_asc">Memiliki Terendah</option>
+                                <option value="belum_memiliki_desc">Belum Memiliki Tertinggi</option>
+                                <option value="belum_memiliki_asc">Belum Memiliki Terendah</option>
+                                <option value="persentase_desc">Persentase Tertinggi</option>
+                                <option value="persentase_asc">Persentase Terendah</option>
+                            </select>
+                        </div>
+                        <div class="export-controls">
+                            <button class="btn-export" onclick="window.aktaDashboard?.exportData()">
+                                <i class="fas fa-download"></i>
+                                Export CSV
+                            </button>
+                        </div>
                     </div>
                     <div id="akta_cerai-table">
                         <!-- Table will be populated by JavaScript -->
@@ -131,11 +153,33 @@
 
                 <!-- Data Table -->
                 <div class="data-table-container">
-                    <div class="export-controls">
-                        <button class="btn-export" onclick="window.aktaDashboard?.exportData()">
-                            <i class="fas fa-download"></i>
-                            Export CSV
-                        </button>
+                    <!-- Added table controls with sorting and search -->
+                    <div class="table-controls-header">
+                        <div class="search-container">
+                            <label for="akta_lahir-search">Cari:</label>
+                            <input type="text" id="akta_lahir-search" placeholder="Cari wilayah..." class="search-input">
+                        </div>
+                        <div class="sort-container">
+                            <label for="akta_lahir-sort">Urutkan:</label>
+                            <select id="akta_lahir-sort" class="sort-select">
+                                <option value="wilayah_asc">Wilayah A-Z</option>
+                                <option value="wilayah_desc">Wilayah Z-A</option>
+                                <option value="wajib_desc">Wajib Tertinggi</option>
+                                <option value="wajib_asc">Wajib Terendah</option>
+                                <option value="memiliki_desc">Memiliki Tertinggi</option>
+                                <option value="memiliki_asc">Memiliki Terendah</option>
+                                <option value="belum_memiliki_desc">Belum Memiliki Tertinggi</option>
+                                <option value="belum_memiliki_asc">Belum Memiliki Terendah</option>
+                                <option value="persentase_desc">Persentase Tertinggi</option>
+                                <option value="persentase_asc">Persentase Terendah</option>
+                            </select>
+                        </div>
+                        <div class="export-controls">
+                            <button class="btn-export" onclick="window.aktaDashboard?.exportData()">
+                                <i class="fas fa-download"></i>
+                                Export CSV
+                            </button>
+                        </div>
                     </div>
                     <div id="akta_lahir-table">
                         <!-- Table will be populated by JavaScript -->
@@ -168,11 +212,31 @@
 
                 <!-- Data Table -->
                 <div class="data-table-container">
-                    <div class="export-controls">
-                        <button class="btn-export" onclick="window.aktaDashboard?.exportData()">
-                            <i class="fas fa-download"></i>
-                            Export CSV
-                        </button>
+                    <!-- Added table controls with sorting and search -->
+                    <div class="table-controls-header">
+                        <div class="search-container">
+                            <label for="akta_mati-search">Cari:</label>
+                            <input type="text" id="akta_mati-search" placeholder="Cari wilayah..." class="search-input">
+                        </div>
+                        <div class="sort-container">
+                            <label for="akta_mati-sort">Urutkan:</label>
+                            <select id="akta_mati-sort" class="sort-select">
+                                <option value="wilayah_asc">Wilayah A-Z</option>
+                                <option value="wilayah_desc">Wilayah Z-A</option>
+                                <option value="laki_laki_desc">Laki-laki Tertinggi</option>
+                                <option value="laki_laki_asc">Laki-laki Terendah</option>
+                                <option value="perempuan_desc">Perempuan Tertinggi</option>
+                                <option value="perempuan_asc">Perempuan Terendah</option>
+                                <option value="total_desc">Total Tertinggi</option>
+                                <option value="total_asc">Total Terendah</option>
+                            </select>
+                        </div>
+                        <div class="export-controls">
+                            <button class="btn-export" onclick="window.aktaDashboard?.exportData()">
+                                <i class="fas fa-download"></i>
+                                Export CSV
+                            </button>
+                        </div>
                     </div>
                     <div id="akta_mati-table">
                         <!-- Table will be populated by JavaScript -->

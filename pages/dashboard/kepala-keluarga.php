@@ -1,22 +1,53 @@
 <?php
+require_once '../../config/database.php';
+require_once '../../config/config.php';
+
+// Initialize database connection
+try {
+    $database = new Database();
+    $conn = $database->getConnection();
+    
+    if (!$conn) {
+        throw new Exception('Database connection failed');
+    }
+} catch (Exception $e) {
+    die('Database Error: ' . $e->getMessage());
+}
+
 include_once '../../includes/sidebar.php';
 
-// Query untuk menghitung statistik
-$queryTotal = "SELECT COUNT(*) as total FROM data_kk";
-$queryLaki = "SELECT COUNT(*) as total FROM data_kk WHERE jenis_kelamin = 'Laki-laki'";
-$queryPerempuan = "SELECT COUNT(*) as total FROM data_kk WHERE jenis_kelamin = 'Perempuan'";
+try {
+    // Query untuk menghitung statistik
+    $queryTotal = "SELECT COUNT(*) as total FROM data_kk";
+    $queryLaki = "SELECT COUNT(*) as total FROM data_kk WHERE jenis_kelamin = 'Laki-laki'";
+    $queryPerempuan = "SELECT COUNT(*) as total FROM data_kk WHERE jenis_kelamin = 'Perempuan'";
 
-$resultTotal = $conn->query($queryTotal);
-$resultLaki = $conn->query($queryLaki);
-$resultPerempuan = $conn->query($queryPerempuan);
+    $stmtTotal = $conn->prepare($queryTotal);
+    $stmtLaki = $conn->prepare($queryLaki);
+    $stmtPerempuan = $conn->prepare($queryPerempuan);
 
-$totalKK = $resultTotal->fetch_assoc()['total'];
-$totalLaki = $resultLaki->fetch_assoc()['total'];
-$totalPerempuan = $resultPerempuan->fetch_assoc()['total'];
+    $stmtTotal->execute();
+    $stmtLaki->execute();
+    $stmtPerempuan->execute();
 
-// Query untuk provinsi (untuk dropdown filter)
-$queryProvinsi = "SELECT DISTINCT kode_wilayah, nama_wilayah FROM wilayah WHERE LENGTH(kode_wilayah) = 2 ORDER BY nama_wilayah";
-$resultProvinsi = $conn->query($queryProvinsi);
+    $totalKK = $stmtTotal->fetch()['total'] ?? 0;
+    $totalLaki = $stmtLaki->fetch()['total'] ?? 0;
+    $totalPerempuan = $stmtPerempuan->fetch()['total'] ?? 0;
+
+    // Query untuk provinsi (untuk dropdown filter)
+    $queryProvinsi = "SELECT DISTINCT kode_wilayah, nama_wilayah FROM wilayah WHERE LENGTH(kode_wilayah) = 2 ORDER BY nama_wilayah";
+    $stmtProvinsi = $conn->prepare($queryProvinsi);
+    $stmtProvinsi->execute();
+    $provinces = $stmtProvinsi->fetchAll();
+
+} catch (Exception $e) {
+    // Handle database errors gracefully
+    $totalKK = 0;
+    $totalLaki = 0;
+    $totalPerempuan = 0;
+    $provinces = [];
+    error_log("Database query error: " . $e->getMessage());
+}
 ?>
 
 <!DOCTYPE html>
@@ -26,6 +57,7 @@ $resultProvinsi = $conn->query($queryProvinsi);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Kepala Keluarga - Data Analytics Kependudukan</title>
     <link href="../../assets/css/style.css" rel="stylesheet">
+    <link href="../../assets/css/dashboard/kepala_keluarga.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -57,9 +89,9 @@ $resultProvinsi = $conn->query($queryProvinsi);
                             <label for="pilihProvinsi">PILIH PROVINSI</label>
                             <select id="pilihProvinsi" class="filter-select">
                                 <option value="">Semua Provinsi</option>
-                                <?php while($row = $resultProvinsi->fetch_assoc()): ?>
-                                    <option value="<?= $row['kode_wilayah'] ?>"><?= $row['nama_wilayah'] ?></option>
-                                <?php endwhile; ?>
+                                <?php foreach($provinces as $row): ?>
+                                    <option value="<?= htmlspecialchars($row['kode_wilayah']) ?>"><?= htmlspecialchars($row['nama_wilayah']) ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="filter-group">
@@ -78,7 +110,7 @@ $resultProvinsi = $conn->query($queryProvinsi);
                                 REFRESH DATA
                             </button>
                             <div class="data-info">
-                                Menampilkan <span id="dataCount"><?= $totalKK ?></span> wilayah
+                                Menampilkan <span id="dataCount"><?= number_format($totalKK) ?></span> wilayah
                             </div>
                         </div>
                     </div>
@@ -152,7 +184,7 @@ $resultProvinsi = $conn->query($queryProvinsi);
                 </div>
                 <div class="table-pagination">
                     <div class="pagination-info">
-                        Menampilkan <span id="showingStart">1</span> - <span id="showingEnd">10</span> dari <span id="totalData"><?= $totalKK ?></span> data
+                        Menampilkan <span id="showingStart">1</span> - <span id="showingEnd">10</span> dari <span id="totalData"><?= number_format($totalKK) ?></span> data
                     </div>
                     <div class="pagination-controls">
                         <button id="prevPage" class="pagination-btn" disabled>
@@ -168,6 +200,6 @@ $resultProvinsi = $conn->query($queryProvinsi);
         </div>
     </div>
 
-    <script src="../../assets/js/dashboard/kepala_keluarga.js"></script>
+    <script src="../../assets/js/dashboard/kepala-keluarga.js"></script>
 </body>
 </html>

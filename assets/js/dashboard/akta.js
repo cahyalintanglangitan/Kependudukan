@@ -26,6 +26,11 @@ class AktaDashboard {
       totalItems: 0,
     }
 
+    this.filters = {
+      search: "",
+      sort: "wilayah_asc",
+    }
+
     this.init()
   }
 
@@ -38,6 +43,8 @@ class AktaDashboard {
 
     // Setup akta type filter
     this.setupAktaTypeFilter()
+
+    this.setupSearchAndSortListeners()
 
     // Initial data load
     this.loadData()
@@ -62,6 +69,33 @@ class AktaDashboard {
     if (aktaTypeFilter) {
       aktaTypeFilter.addEventListener("change", () => this.loadData())
     }
+  }
+
+  setupSearchAndSortListeners() {
+    const tabs = ["akta_cerai", "akta_lahir", "akta_mati"]
+
+    tabs.forEach((tab) => {
+      // Search input
+      const searchInput = document.getElementById(`${tab}-search`)
+      if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+          this.filters.search = e.target.value.toLowerCase()
+          this.pagination.currentPage = 1 // Reset to first page
+          this.updateDataTable()
+          this.updateDataCounter() // Update counter when search changes
+        })
+      }
+
+      // Sort select
+      const sortSelect = document.getElementById(`${tab}-sort`)
+      if (sortSelect) {
+        sortSelect.addEventListener("change", (e) => {
+          this.filters.sort = e.target.value
+          this.pagination.currentPage = 1 // Reset to first page
+          this.updateDataTable()
+        })
+      }
+    })
   }
 
   switchTab(tabType) {
@@ -90,6 +124,17 @@ class AktaDashboard {
       }, 10)
     }
 
+    this.filters.search = ""
+    this.filters.sort = "wilayah_asc"
+    this.pagination.currentPage = 1
+
+    // Update search and sort controls for new tab
+    const searchInput = document.getElementById(`${tabType}-search`)
+    const sortSelect = document.getElementById(`${tabType}-sort`)
+
+    if (searchInput) searchInput.value = ""
+    if (sortSelect) sortSelect.value = "wilayah_asc"
+
     // Update stats and charts for active tab
     this.updateTabContent()
   }
@@ -110,6 +155,8 @@ class AktaDashboard {
         this.currentData = result.data || {}
         this.currentStats = result.stats || {}
         this.allProvinces = result.provinces || []
+
+        this.removeDuplicateData()
 
         // Update UI components
         this.updateOverallStats()
@@ -145,6 +192,24 @@ class AktaDashboard {
       // Update UI error state
       window.DashboardCommon.showError(["statCerai", "statLahir", "statMati", "statTotal"], "Error")
     }
+  }
+
+  removeDuplicateData() {
+    Object.keys(this.currentData).forEach((tabKey) => {
+      if (Array.isArray(this.currentData[tabKey])) {
+        const uniqueData = []
+        const seenCodes = new Set()
+
+        this.currentData[tabKey].forEach((item) => {
+          if (!seenCodes.has(item.kode)) {
+            seenCodes.add(item.kode)
+            uniqueData.push(item)
+          }
+        })
+
+        this.currentData[tabKey] = uniqueData
+      }
+    })
   }
 
   getCurrentFilters() {
@@ -202,7 +267,8 @@ class AktaDashboard {
     const counterElement = document.getElementById("dataCount")
     if (counterElement) {
       const activeTabData = this.currentData[this.activeTab]
-      const activeTabCount = Array.isArray(activeTabData) ? activeTabData.length : 0
+      const filteredData = this.getFilteredAndSortedData(activeTabData)
+      const activeTabCount = filteredData.length
       counterElement.textContent = activeTabCount.toLocaleString("id-ID")
     }
   }
@@ -288,7 +354,6 @@ class AktaDashboard {
       return
     }
 
-    // Create only real charts based on database data
     this.createWilayahDistributionChart(tabData)
     this.createKepemilikanOverviewChart(tabData)
   }
@@ -299,42 +364,12 @@ class AktaDashboard {
 
     const ctx = canvas.getContext("2d")
 
-    let chartData, datasets
+    let chartData = this.getFilteredAndSortedData(data)
+    chartData = chartData.slice(0, 10) // Show top 10 after applying same sorting as table
 
-    const sortBy = document.getElementById("sortBy")?.value || "wilayah"
-    const sortOrder = document.getElementById("sortOrder")?.value || "asc"
+    let datasets
 
     if (this.activeTab === "akta_mati") {
-      // Sort data based on current filter settings
-      chartData = [...data]
-        .sort((a, b) => {
-          let aVal, bVal
-          switch (sortBy) {
-            case "laki_laki":
-              aVal = a.laki_laki || 0
-              bVal = b.laki_laki || 0
-              break
-            case "perempuan":
-              aVal = a.perempuan || 0
-              bVal = b.perempuan || 0
-              break
-            case "total":
-              aVal = a.total || 0
-              bVal = b.total || 0
-              break
-            default:
-              aVal = a.wilayah || ""
-              bVal = b.wilayah || ""
-          }
-
-          if (typeof aVal === "string") {
-            return sortOrder === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
-          } else {
-            return sortOrder === "asc" ? aVal - bVal : bVal - aVal
-          }
-        })
-        .slice(0, 10)
-
       datasets = [
         {
           label: "Laki-laki",
@@ -350,40 +385,6 @@ class AktaDashboard {
         },
       ]
     } else {
-      // Sort data based on current filter settings
-      chartData = [...data]
-        .sort((a, b) => {
-          let aVal, bVal
-          switch (sortBy) {
-            case "wajib":
-              aVal = a.wajib || 0
-              bVal = b.wajib || 0
-              break
-            case "memiliki":
-              aVal = a.memiliki || 0
-              bVal = b.memiliki || 0
-              break
-            case "belum_memiliki":
-              aVal = a.belum_memiliki || 0
-              bVal = b.belum_memiliki || 0
-              break
-            case "persentase":
-              aVal = a.persentase || 0
-              bVal = b.persentase || 0
-              break
-            default:
-              aVal = a.wilayah || ""
-              bVal = b.wilayah || ""
-          }
-
-          if (typeof aVal === "string") {
-            return sortOrder === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
-          } else {
-            return sortOrder === "asc" ? aVal - bVal : bVal - aVal
-          }
-        })
-        .slice(0, 10)
-
       datasets = [
         {
           label: "Memiliki Akta",
@@ -452,10 +453,12 @@ class AktaDashboard {
 
     const ctx = canvas.getContext("2d")
 
+    const filteredData = this.getFilteredAndSortedData(data)
+
     let pieData, pieLabels, pieColors
 
     if (this.activeTab === "akta_mati") {
-      const totals = data.reduce(
+      const totals = filteredData.reduce(
         (acc, item) => {
           acc.lakiLaki += item.laki_laki || 0
           acc.perempuan += item.perempuan || 0
@@ -468,7 +471,7 @@ class AktaDashboard {
       pieLabels = ["Laki-laki", "Perempuan"]
       pieColors = [this.chartColors.lakiLaki, this.chartColors.perempuan]
     } else {
-      const totals = data.reduce(
+      const totals = filteredData.reduce(
         (acc, item) => {
           acc.memiliki += item.memiliki || 0
           acc.belumMemiliki += item.belum_memiliki || 0
@@ -512,7 +515,7 @@ class AktaDashboard {
             callbacks: {
               label: (context) => {
                 const total = context.dataset.data.reduce((a, b) => a + b, 0)
-                const percentage = ((context.parsed * 100) / total).toFixed(1)
+                const percentage = ((context.parsed * 100) / total).toFixed(2).replace(".", ",")
                 return `${context.label}: ${context.parsed.toLocaleString("id-ID")} (${percentage}%)`
               },
             },
@@ -544,11 +547,13 @@ class AktaDashboard {
       return
     }
 
-    this.pagination.totalItems = tabData.length
+    const filteredData = this.getFilteredAndSortedData(tabData)
+
+    this.pagination.totalItems = filteredData.length
     const totalPages = Math.ceil(this.pagination.totalItems / this.pagination.itemsPerPage)
     const startIndex = (this.pagination.currentPage - 1) * this.pagination.itemsPerPage
     const endIndex = startIndex + this.pagination.itemsPerPage
-    const paginatedData = tabData.slice(startIndex, endIndex)
+    const paginatedData = filteredData.slice(startIndex, endIndex)
 
     let tableHTML = `
       <div class="table-controls">
@@ -571,16 +576,17 @@ class AktaDashboard {
 
     if (this.activeTab === "akta_mati") {
       tableHTML +=
-        '<th>Wilayah</th><th class="number">Laki-laki</th><th class="number">Perempuan</th><th class="number">Total</th>'
+        '<th>Kode Wilayah</th><th>Wilayah</th><th class="number">Laki-laki</th><th class="number">Perempuan</th><th class="number">Total</th>'
     } else {
       tableHTML +=
-        '<th>Wilayah</th><th class="number">Wajib</th><th class="number">Memiliki</th><th class="number">Belum Memiliki</th><th class="percentage">Persentase</th>'
+        '<th>Kode Wilayah</th><th>Wilayah</th><th class="number">Wajib</th><th class="number">Memiliki</th><th class="number">Belum Memiliki</th><th class="percentage">Persentase</th>'
     }
 
     tableHTML += "</tr></thead><tbody>"
 
     paginatedData.forEach((item) => {
       tableHTML += "<tr>"
+      tableHTML += `<td>${item.kode || "-"}</td>`
       tableHTML += `<td>${item.wilayah}</td>`
 
       if (this.activeTab === "akta_mati") {
@@ -596,7 +602,7 @@ class AktaDashboard {
         tableHTML += `<td class="number">${(item.wajib || 0).toLocaleString("id-ID")}</td>`
         tableHTML += `<td class="number">${(item.memiliki || 0).toLocaleString("id-ID")}</td>`
         tableHTML += `<td class="number">${(item.belum_memiliki || 0).toLocaleString("id-ID")}</td>`
-        tableHTML += `<td class="percentage ${persentaseClass}">${persentase}%</td>`
+        tableHTML += `<td class="percentage ${persentaseClass}">${persentase.toFixed(2).replace(".", ",")}%</td>`
       }
 
       tableHTML += "</tr>"
@@ -639,6 +645,68 @@ class AktaDashboard {
     }
 
     tableContainer.innerHTML = tableHTML
+  }
+
+  getFilteredAndSortedData(data) {
+    if (!Array.isArray(data)) return []
+
+    let filteredData = [...data]
+
+    // Apply search filter
+    if (this.filters.search) {
+      filteredData = filteredData.filter((item) => item.wilayah.toLowerCase().includes(this.filters.search))
+    }
+
+    filteredData.sort((a, b) => {
+      const [field, order] = this.filters.sort.split("_")
+      let aVal, bVal
+
+      switch (field) {
+        case "wilayah":
+          aVal = a.wilayah || ""
+          bVal = b.wilayah || ""
+          break
+        case "wajib":
+          aVal = a.wajib || 0
+          bVal = b.wajib || 0
+          break
+        case "memiliki":
+          aVal = a.memiliki || 0
+          bVal = b.memiliki || 0
+          break
+        case "belum":
+          aVal = a.belum_memiliki || 0
+          bVal = b.belum_memiliki || 0
+          break
+        case "persentase":
+          aVal = a.persentase || 0
+          bVal = b.persentase || 0
+          break
+        case "laki":
+          aVal = a.laki_laki || 0
+          bVal = b.laki_laki || 0
+          break
+        case "perempuan":
+          aVal = a.perempuan || 0
+          bVal = b.perempuan || 0
+          break
+        case "total":
+          aVal = a.total || 0
+          bVal = b.total || 0
+          break
+        default:
+          aVal = a.wilayah || ""
+          bVal = b.wilayah || ""
+      }
+
+      if (typeof aVal === "string") {
+        return order === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+      } else {
+        return order === "asc" ? aVal - bVal : bVal - aVal
+      }
+    })
+
+    return filteredData
   }
 
   // Public methods

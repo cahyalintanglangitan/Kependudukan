@@ -1,56 +1,85 @@
-/* assets/css/dashboard/akta.css - Akta page specific styles */
+/* assets/css/dashboard/akta.css */
 
-/* Akta Type Tabs */
+/* Tab Navigation */
 .akta-tabs {
   background: white;
-  padding: 20px 25px;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 25px;
+  overflow: hidden;
+  margin-bottom: 30px;
 }
 
 .tab-buttons {
   display: flex;
-  gap: 10px;
-  border-bottom: 2px solid #ecf0f1;
-  margin-bottom: 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
 }
 
 .tab-button {
-  padding: 12px 20px;
-  background: none;
+  flex: 1;
+  padding: 15px 20px;
   border: none;
+  background: transparent;
+  color: #6c757d;
   font-size: 14px;
   font-weight: 500;
-  color: #7f8c8d;
   cursor: pointer;
-  border-radius: 8px 8px 0 0;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   position: relative;
 }
 
 .tab-button:hover {
-  background: rgba(52, 152, 219, 0.1);
-  color: #3498db;
+  background: #e9ecef;
+  color: #495057;
 }
 
 .tab-button.active {
-  background: #3498db;
-  color: white;
+  background: white;
+  color: #3498db;
   font-weight: 600;
 }
 
 .tab-button.active::after {
   content: "";
   position: absolute;
-  bottom: -2px;
+  bottom: 0;
   left: 0;
   right: 0;
-  height: 2px;
+  height: 3px;
   background: #3498db;
 }
 
-/* Akta specific stat cards */
+.tab-button i {
+  font-size: 16px;
+}
+
+/* Tab Content */
+.tab-content {
+  display: none;
+  padding: 25px;
+  animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Akta-specific stat cards */
 .stat-card.cerai {
   --card-color: #e74c3c;
 }
@@ -60,7 +89,7 @@
 }
 
 .stat-card.mati {
-  --card-color: #34495e;
+  --card-color: #6c757d;
 }
 
 .stat-card.wajib {
@@ -68,17 +97,25 @@
 }
 
 .stat-card.memiliki {
-  --card-color: #27ae60;
+  --card-color: #2ecc71;
 }
 
 .stat-card.belum-memiliki {
-  --card-color: #e67e22;
+  --card-color: #e74c3c;
 }
 
-/* Chart specific styles for akta */
+.stat-card.lakiLaki {
+  --card-color: #3498db;
+}
+
+.stat-card.perempuan {
+  --card-color: #e91e63;
+}
+
+/* Chart Container */
 .akta-chart-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 2fr 1fr;
   gap: 25px;
   margin-bottom: 30px;
 }
@@ -88,6 +125,12 @@
   padding: 25px;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.comparison-chart:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .comparison-chart h3 {
@@ -95,229 +138,254 @@
   font-weight: 600;
   color: #2c3e50;
   margin-bottom: 20px;
-  text-align: center;
   padding-bottom: 10px;
   border-bottom: 2px solid #ecf0f1;
 }
 
-/* Data table styles */
+.chart-container {
+  position: relative;
+  height: 400px;
+}
+
+/* Data Table Container */
 .data-table-container {
   background: white;
-  padding: 25px;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 25px;
-  overflow-x: auto;
+  overflow: hidden;
 }
 
-/* Added table controls for pagination and per-page selector */
-.table-controls {
+/* Table Controls Header - NEW */
+.table-controls-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #ecf0f1;
+  justify-content: space-between;
+  padding: 20px 25px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
-.per-page-selector {
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-container label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #495057;
+  white-space: nowrap;
+}
+
+.search-input {
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 100%;
+  max-width: 250px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.sort-container {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.per-page-selector label {
+.sort-container label {
   font-size: 14px;
   font-weight: 500;
-  color: #2c3e50;
+  color: #495057;
+  white-space: nowrap;
+}
+
+.sort-select {
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  min-width: 180px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.sort-select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.export-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-export {
+  padding: 8px 16px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-export:hover {
+  background: #2980b9;
+  transform: translateY(-1px);
+}
+
+.btn-export:active {
+  transform: translateY(0);
+}
+
+/* Table Controls (existing) */
+.table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 25px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.per-page-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .per-page-selector select {
-  padding: 6px 10px;
-  border: 2px solid #e9ecef;
-  border-radius: 6px;
+  padding: 4px 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
   font-size: 13px;
   background: white;
-  color: #2c3e50;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.per-page-selector select:focus {
-  outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
 }
 
 .pagination-info {
-  font-size: 14px;
-  color: #7f8c8d;
   font-weight: 500;
 }
 
+/* Data Table */
 .data-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
-  /* Updated font family to match other elements */
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-}
-
-.data-table th,
-.data-table td {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #ecf0f1;
-  /* Added consistent font family */
-  font-family: inherit;
 }
 
 .data-table th {
   background: #f8f9fa;
+  padding: 12px 15px;
+  text-align: left;
   font-weight: 600;
-  color: #2c3e50;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
   position: sticky;
   top: 0;
   z-index: 10;
-  /* Ensure header uses consistent font */
-  font-family: inherit;
 }
 
-/* Added sortable column header styles */
-.data-table th.sortable {
-  cursor: pointer;
-  user-select: none;
-  position: relative;
-  transition: all 0.2s ease;
-}
-
-.data-table th.sortable:hover {
-  background: #e9ecef;
-  color: #3498db;
-}
-
-.data-table th.sortable.sorted {
-  background: #3498db;
-  color: white;
-}
-
-.data-table th.sortable .sort-arrow {
-  display: inline-block;
-  margin-left: 5px;
-  font-size: 12px;
-  opacity: 0.7;
-  transition: all 0.2s ease;
-}
-
-.data-table th.sortable:hover .sort-arrow,
-.data-table th.sortable.sorted .sort-arrow {
-  opacity: 1;
-}
-
-.data-table th.sortable.sorted .sort-arrow {
-  color: white;
-  font-weight: bold;
-}
-
-.data-table tr:hover {
-  background: rgba(52, 152, 219, 0.05);
-}
-
-.data-table .number {
+.data-table th.number,
+.data-table th.percentage {
   text-align: right;
-  /* Updated monospace font to match system fonts while maintaining readability */
-  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
-  font-weight: 500;
 }
 
-.data-table .percentage {
-  text-align: center;
+.data-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #f1f3f4;
+  color: #495057;
+}
+
+.data-table td.number {
+  text-align: right;
+  font-weight: 500;
+  font-family: "Courier New", monospace;
+}
+
+.data-table td.percentage {
+  text-align: right;
   font-weight: 600;
 }
 
-.percentage.high {
+.data-table td.percentage.high {
   color: #27ae60;
 }
 
-.percentage.medium {
+.data-table td.percentage.medium {
   color: #f39c12;
 }
 
-.percentage.low {
+.data-table td.percentage.low {
   color: #e74c3c;
 }
 
-/* Added pagination controls styling */
+.data-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+/* Pagination Controls */
 .pagination-controls {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #ecf0f1;
+  padding: 20px;
+  gap: 5px;
+  background: #f8f9fa;
+  border-top: 1px solid #dee2e6;
 }
 
 .pagination-btn {
   padding: 8px 12px;
-  border: 2px solid #e9ecef;
+  border: 1px solid #dee2e6;
   background: white;
-  color: #2c3e50;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
+  color: #495057;
   cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .pagination-btn:hover {
-  border-color: #3498db;
-  background: rgba(52, 152, 219, 0.1);
-  color: #3498db;
+  background: #e9ecef;
+  border-color: #adb5bd;
 }
 
 .pagination-btn.active {
   background: #3498db;
-  border-color: #3498db;
   color: white;
+  border-color: #3498db;
 }
 
-.pagination-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.pagination-btn:disabled:hover {
-  border-color: #e9ecef;
-  background: white;
-  color: #2c3e50;
-}
-
-.page-number {
-  min-width: 35px;
+.pagination-btn.page-number {
+  min-width: 40px;
   justify-content: center;
 }
 
-/* Loading states */
-.tab-content {
-  display: none;
-  min-height: 200px;
-  position: relative;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.3s ease;
-}
-
-.tab-content.active {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Responsive design */
+/* Responsive Design */
 @media (max-width: 1200px) {
   .akta-chart-container {
     grid-template-columns: 1fr;
@@ -325,36 +393,62 @@
 }
 
 @media (max-width: 768px) {
-  .akta-tabs {
-    padding: 15px;
+  .tab-buttons {
+    flex-direction: column;
+  }
+
+  .tab-button {
+    justify-content: flex-start;
+    padding: 12px 20px;
+  }
+
+  .tab-content {
+    padding: 20px;
+  }
+
+  .akta-chart-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .comparison-chart {
     padding: 20px;
   }
 
-  .data-table th,
-  .data-table td {
-    padding: 8px 10px;
+  .chart-container {
+    height: 300px;
+  }
+
+  .table-controls-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .search-container,
+  .sort-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .search-input,
+  .sort-select {
+    max-width: none;
+  }
+
+  .data-table {
     font-size: 12px;
   }
 
-  /* Added responsive styles for sortable headers */
-  .data-table th.sortable .sort-arrow {
-    font-size: 10px;
-    margin-left: 3px;
-  }
-
-  /* Added responsive styles for table controls and pagination */
-  .table-controls {
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-start;
+  .data-table th,
+  .data-table td {
+    padding: 8px 10px;
   }
 
   .pagination-controls {
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 3px;
   }
 
   .pagination-btn {
@@ -364,63 +458,89 @@
 }
 
 @media (max-width: 480px) {
-  .akta-tabs {
+  .tab-content {
     padding: 15px;
   }
 
   .comparison-chart {
-    padding: 20px;
+    padding: 15px;
+  }
+
+  .chart-container {
+    height: 250px;
+  }
+
+  .table-controls-header {
+    padding: 15px;
+  }
+
+  .data-table {
+    font-size: 11px;
   }
 
   .data-table th,
   .data-table td {
     padding: 6px 8px;
-    font-size: 11px;
-  }
-
-  /* Added mobile-specific sortable header styles */
-  .data-table th.sortable .sort-arrow {
-    font-size: 9px;
-    margin-left: 2px;
-  }
-
-  /* Added mobile-specific pagination styles */
-  .pagination-controls {
-    gap: 3px;
-  }
-
-  .pagination-btn {
-    padding: 5px 8px;
-    font-size: 11px;
-    min-width: 30px;
   }
 }
 
-/* Export button */
-.export-controls {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  justify-content: flex-end;
-}
-
-.btn-export {
-  background: linear-gradient(135deg, #27ae60, #229954);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
+/* Loading and Error States */
+.loading-spinner {
   display: flex;
   align-items: center;
-  gap: 6px;
-  transition: all 0.3s ease;
+  justify-content: center;
+  padding: 20px;
 }
 
-.btn-export:hover {
-  background: linear-gradient(135deg, #229954, #1e8449);
-  transform: translateY(-1px);
-  box-shadow: 0 3px 10px rgba(39, 174, 96, 0.3);
+.loading-spinner i {
+  font-size: 24px;
+  color: #3498db;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.text-center {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Focus states for accessibility */
+.search-input:focus,
+.sort-select:focus,
+.btn-export:focus,
+.pagination-btn:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .table-controls-header,
+  .table-controls,
+  .pagination-controls {
+    display: none;
+  }
+
+  .data-table {
+    font-size: 12px;
+  }
+
+  .tab-buttons {
+    display: none;
+  }
+
+  .tab-content {
+    display: block !important;
+    padding: 0;
+  }
 }
