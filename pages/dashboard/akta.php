@@ -24,63 +24,6 @@
             <p>Distribusi kepemilikan akta cerai, akta lahir, dan akta mati</p>
         </div>
 
-        <!-- Filter Controls -->
-        <div class="filter-controls">
-            <div class="filter-title">
-                <i class="fas fa-filter"></i>
-                Filter Data Akta
-            </div>
-            
-            <div class="filter-group">
-                <label for="aktaTypeFilter">Jenis Akta</label>
-                <select id="aktaTypeFilter">
-                    <option value="all">Semua Akta</option>
-                    <option value="akta_cerai">Akta Cerai</option>
-                    <option value="akta_lahir">Akta Lahir</option>
-                    <option value="akta_mati">Akta Mati</option>
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label for="regionTypeFilter">Tipe Wilayah</label>
-                <select id="regionTypeFilter">
-                    <option value="all">Semua Wilayah</option>
-                    <option value="province">Provinsi</option>
-                    <option value="kabupaten">Kabupaten</option>
-                    <option value="kota">Kota</option>
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label for="provinceFilter">Pilih Provinsi</label>
-                <select id="provinceFilter">
-                    <option value="all">Semua Provinsi</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label for="sortFilter">Urutkan Berdasarkan</label>
-                <select id="sortFilter">
-                    <option value="memiliki_desc">Kepemilikan Tertinggi</option>
-                    <option value="wajib_desc">Wajib Akta Tertinggi</option>
-                    <option value="name_asc">Nama A-Z</option>
-                    <option value="name_desc">Nama Z-A</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label>&nbsp;</label>
-                <button id="refreshBtn" class="btn-refresh">
-                    <i class="fas fa-sync-alt"></i>
-                    Refresh Data
-                </button>
-            </div>
-
-            <div class="filter-stats" id="filterStats">
-                Menampilkan <span id="dataCount">0</span> record
-            </div>
-        </div>
-
         <!-- Overall Stats Cards -->
         <div class="stats-grid">
             <div class="stat-card cerai">

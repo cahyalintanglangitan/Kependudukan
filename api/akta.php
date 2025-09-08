@@ -53,7 +53,6 @@ try {
         return "";
     }
 
-    // Function to build sort clause
     function buildSortClause($sort_by, $table_type) {
         switch ($sort_by) {
             case 'name_asc':
@@ -64,19 +63,80 @@ try {
                 if ($table_type === 'akta_mati') {
                     return " ORDER BY JUMLAH DESC";
                 } else {
-                    return " ORDER BY `WAJIB AKTA CERAI` DESC";
+                    return " ORDER BY CAST(REPLACE(REPLACE(`WAJIB AKTA CERAI`, ',', ''), '.', '') AS UNSIGNED) DESC";
+                }
+            case 'wajib_asc':
+                if ($table_type === 'akta_mati') {
+                    return " ORDER BY JUMLAH ASC";
+                } else {
+                    return " ORDER BY CAST(REPLACE(REPLACE(`WAJIB AKTA CERAI`, ',', ''), '.', '') AS UNSIGNED) ASC";
                 }
             case 'memiliki_desc':
                 if ($table_type === 'akta_mati') {
                     return " ORDER BY JUMLAH DESC";
                 } else {
-                    return " ORDER BY `MEMILIKI AKTA CERAI` DESC";
+                    return " ORDER BY CAST(REPLACE(REPLACE(`MEMILIKI AKTA CERAI`, ',', ''), '.', '') AS UNSIGNED) DESC";
                 }
+            case 'memiliki_asc':
+                if ($table_type === 'akta_mati') {
+                    return " ORDER BY JUMLAH ASC";
+                } else {
+                    return " ORDER BY CAST(REPLACE(REPLACE(`MEMILIKI AKTA CERAI`, ',', ''), '.', '') AS UNSIGNED) ASC";
+                }
+            case 'belum_memiliki_desc':
+                if ($table_type === 'akta_mati') {
+                    return " ORDER BY JUMLAH DESC";
+                } else {
+                    return " ORDER BY CAST(REPLACE(REPLACE(`BELUM MEMILIKI AKTA CERAI`, ',', ''), '.', '') AS UNSIGNED) DESC";
+                }
+            case 'belum_memiliki_asc':
+                if ($table_type === 'akta_mati') {
+                    return " ORDER BY JUMLAH ASC";
+                } else {
+                    return " ORDER BY CAST(REPLACE(REPLACE(`BELUM MEMILIKI AKTA CERAI`, ',', ''), '.', '') AS UNSIGNED) ASC";
+                }
+            case 'persentase_desc':
+                if ($table_type === 'akta_mati') {
+                    return " ORDER BY JUMLAH DESC";
+                } else {
+                    return " ORDER BY CAST(REPLACE(`Persentase Kepemilikan`, '%', '') AS DECIMAL(5,2)) DESC";
+                }
+            case 'persentase_asc':
+                if ($table_type === 'akta_mati') {
+                    return " ORDER BY JUMLAH ASC";
+                } else {
+                    return " ORDER BY CAST(REPLACE(`Persentase Kepemilikan`, '%', '') AS DECIMAL(5,2)) ASC";
+                }
+            case 'laki_laki_desc':
+                if ($table_type === 'akta_mati') {
+                    return " ORDER BY CAST(REPLACE(REPLACE(`LAKI-LAKI`, ',', ''), '.', '') AS UNSIGNED) DESC";
+                } else {
+                    return " ORDER BY CAST(REPLACE(REPLACE(`MEMILIKI AKTA CERAI`, ',', ''), '.', '') AS UNSIGNED) DESC";
+                }
+            case 'laki_laki_asc':
+                if ($table_type === 'akta_mati') {
+                    return " ORDER BY CAST(REPLACE(REPLACE(`LAKI-LAKI`, ',', ''), '.', '') AS UNSIGNED) ASC";
+                } else {
+                    return " ORDER BY CAST(REPLACE(REPLACE(`MEMILIKI AKTA CERAI`, ',', ''), '.', '') AS UNSIGNED) ASC";
+                }
+            case 'perempuan_desc':
+                if ($table_type === 'akta_mati') {
+                    return " ORDER BY CAST(REPLACE(REPLACE(PEREMPUAN, ',', ''), '.', '') AS UNSIGNED) DESC";
+                } else {
+                    return " ORDER BY CAST(REPLACE(REPLACE(`MEMILIKI AKTA CERAI`, ',', ''), '.', '') AS UNSIGNED) DESC";
+                }
+            case 'perempuan_asc':
+                if ($table_type === 'akta_mati') {
+                    return " ORDER BY CAST(REPLACE(REPLACE(PEREMPUAN, ',', ''), '.', '') AS UNSIGNED) ASC";
+                } else {
+                    return " ORDER BY CAST(REPLACE(REPLACE(`MEMILIKI AKTA CERAI`, ',', ''), '.', '') AS UNSIGNED) ASC";
+                }
+            case 'total_desc':
             default:
                 if ($table_type === 'akta_mati') {
                     return " ORDER BY JUMLAH DESC";
                 } else {
-                    return " ORDER BY `MEMILIKI AKTA CERAI` DESC";
+                    return " ORDER BY CAST(REPLACE(REPLACE(`MEMILIKI AKTA CERAI`, ',', ''), '.', '') AS UNSIGNED) DESC";
                 }
         }
     }
