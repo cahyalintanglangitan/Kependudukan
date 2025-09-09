@@ -108,12 +108,12 @@ window.Sidebar = {
                 category: 'Data Analytics Kependudukan',
                 icon: 'fas fa-wheelchair'
             },
-            'nav-kelompok-umur': {
+            'nav-kelompok_umur': {
                 title: 'Kelompok Umur',
                 category: 'Data Analytics Kependudukan',
                 icon: 'fas fa-calendar-alt'
             },
-            'nav-kepala-keluarga': {
+            'nav-kepala_keluarga': {
                 title: 'Kepala Keluarga',
                 category: 'Data Analytics Kependudukan',
                 icon: 'fas fa-user'
