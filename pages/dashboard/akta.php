@@ -103,6 +103,8 @@
                         <div class="sort-container">
                             <label for="akta_cerai-sort">Urutkan:</label>
                             <select id="akta_cerai-sort" class="sort-select">
+                                <option value="kode_asc">Kode Wilayah A-Z</option>
+                                <option value="kode_desc">Kode Wilayah Z-A</option>
                                 <option value="wilayah_asc">Wilayah A-Z</option>
                                 <option value="wilayah_desc">Wilayah Z-A</option>
                                 <option value="wajib_desc">Wajib Tertinggi</option>
@@ -116,6 +118,10 @@
                             </select>
                         </div>
                         <div class="export-controls">
+                            <button class="btn-refresh" id="akta_cerai-refresh">
+                                <i class="fas fa-sync-alt"></i>
+                                Refresh
+                            </button>
                             <button class="btn-export" onclick="window.aktaDashboard?.exportData()">
                                 <i class="fas fa-download"></i>
                                 Export CSV
@@ -162,6 +168,8 @@
                         <div class="sort-container">
                             <label for="akta_lahir-sort">Urutkan:</label>
                             <select id="akta_lahir-sort" class="sort-select">
+                                <option value="kode_asc">Kode Wilayah A-Z</option>
+                                <option value="kode_desc">Kode Wilayah Z-A</option>
                                 <option value="wilayah_asc">Wilayah A-Z</option>
                                 <option value="wilayah_desc">Wilayah Z-A</option>
                                 <option value="wajib_desc">Wajib Tertinggi</option>
@@ -175,6 +183,10 @@
                             </select>
                         </div>
                         <div class="export-controls">
+                            <button class="btn-refresh" id="akta_lahir-refresh">
+                                <i class="fas fa-sync-alt"></i>
+                                Refresh
+                            </button>
                             <button class="btn-export" onclick="window.aktaDashboard?.exportData()">
                                 <i class="fas fa-download"></i>
                                 Export CSV
@@ -221,6 +233,8 @@
                         <div class="sort-container">
                             <label for="akta_mati-sort">Urutkan:</label>
                             <select id="akta_mati-sort" class="sort-select">
+                                <option value="kode_asc">Kode Wilayah A-Z</option>
+                                <option value="kode_desc">Kode Wilayah Z-A</option>
                                 <option value="wilayah_asc">Wilayah A-Z</option>
                                 <option value="wilayah_desc">Wilayah Z-A</option>
                                 <option value="laki_laki_desc">Laki-laki Tertinggi</option>
@@ -232,6 +246,10 @@
                             </select>
                         </div>
                         <div class="export-controls">
+                            <button class="btn-refresh" id="akta_mati-refresh">
+                                <i class="fas fa-sync-alt"></i>
+                                Refresh
+                            </button>
                             <button class="btn-export" onclick="window.aktaDashboard?.exportData()">
                                 <i class="fas fa-download"></i>
                                 Export CSV

@@ -95,6 +95,14 @@ class AktaDashboard {
           this.updateDataTable()
         })
       }
+
+      const refreshBtn = document.getElementById(`${tab}-refresh`)
+      if (refreshBtn) {
+        refreshBtn.addEventListener("click", (e) => {
+          e.preventDefault()
+          this.loadData()
+        })
+      }
     })
   }
 
@@ -364,8 +372,25 @@ class AktaDashboard {
 
     const ctx = canvas.getContext("2d")
 
-    let chartData = this.getFilteredAndSortedData(data)
-    chartData = chartData.slice(0, 10) // Show top 10 after applying same sorting as table
+    let chartData = [...data]
+
+    if (this.activeTab === "akta_mati") {
+      // Sort by total (laki-laki + perempuan) descending
+      chartData.sort((a, b) => {
+        const totalA = (a.laki_laki || 0) + (a.perempuan || 0)
+        const totalB = (b.laki_laki || 0) + (b.perempuan || 0)
+        return totalB - totalA
+      })
+    } else {
+      // Sort by total (memiliki + belum_memiliki) descending for akta_cerai and akta_lahir
+      chartData.sort((a, b) => {
+        const totalA = (a.memiliki || 0) + (a.belum_memiliki || 0)
+        const totalB = (b.memiliki || 0) + (b.belum_memiliki || 0)
+        return totalB - totalA
+      })
+    }
+
+    chartData = chartData.slice(0, 10) // Show top 10 regions with highest totals
 
     let datasets
 
@@ -594,15 +619,25 @@ class AktaDashboard {
         tableHTML += `<td class="number">${(item.perempuan || 0).toLocaleString("id-ID")}</td>`
         tableHTML += `<td class="number">${(item.total || 0).toLocaleString("id-ID")}</td>`
       } else {
-        const persentase = item.persentase || 0
+        let persentase = item.persentase || "0,00"
+
+        // If persentase is a number, convert to string with proper formatting
+        if (typeof persentase === "number") {
+          persentase = persentase.toString().replace(".", ",")
+        }
+
+        // Ensure it's a string and handle decimal formatting
+        persentase = String(persentase).replace(".", ",")
+
         let persentaseClass = "low"
-        if (persentase >= 80) persentaseClass = "high"
-        else if (persentase >= 60) persentaseClass = "medium"
+        const numPersentase = Number.parseFloat(String(persentase).replace(",", "."))
+        if (numPersentase >= 80) persentaseClass = "high"
+        else if (numPersentase >= 60) persentaseClass = "medium"
 
         tableHTML += `<td class="number">${(item.wajib || 0).toLocaleString("id-ID")}</td>`
         tableHTML += `<td class="number">${(item.memiliki || 0).toLocaleString("id-ID")}</td>`
         tableHTML += `<td class="number">${(item.belum_memiliki || 0).toLocaleString("id-ID")}</td>`
-        tableHTML += `<td class="percentage ${persentaseClass}">${persentase.toFixed(2).replace(".", ",")}%</td>`
+        tableHTML += `<td class="percentage ${persentaseClass}">${persentase}%</td>`
       }
 
       tableHTML += "</tr>"
@@ -662,6 +697,10 @@ class AktaDashboard {
       let aVal, bVal
 
       switch (field) {
+        case "kode":
+          aVal = Number.parseFloat(a.kode) || 0
+          bVal = Number.parseFloat(b.kode) || 0
+          break
         case "wilayah":
           aVal = a.wilayah || ""
           bVal = b.wilayah || ""

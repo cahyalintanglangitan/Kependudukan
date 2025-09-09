@@ -55,6 +55,10 @@ try {
 
     function buildSortClause($sort_by, $table_type) {
         switch ($sort_by) {
+            case 'kode_asc':
+                return " ORDER BY CAST(`KODE WILAYAH` AS DECIMAL(10,2)) ASC";
+            case 'kode_desc':
+                return " ORDER BY CAST(`KODE WILAYAH` AS DECIMAL(10,2)) DESC";
             case 'name_asc':
                 return " ORDER BY `NAMA WILAYAH` ASC";
             case 'name_desc':

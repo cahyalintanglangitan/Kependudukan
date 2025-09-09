@@ -544,3 +544,55 @@
     padding: 0;
   }
 }
+
+/* Additional styles for refresh button */
+.export-controls {
+  display: flex;
+  gap: 10px;
+}
+
+/* Added refresh button styles */
+.btn-refresh {
+  padding: 8px 16px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-refresh:hover {
+  background: #218838;
+  transform: translateY(-1px);
+}
+
+.btn-refresh:active {
+  transform: translateY(0);
+}
+
+.btn-export {
+  padding: 8px 16px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Added focus state for refresh button */
+.btn-refresh:focus {
+  outline: 2px solid #28a745;
+  outline-offset: 2px;
+}
