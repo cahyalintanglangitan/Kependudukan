@@ -5,7 +5,6 @@ class KepalaKeluargaDashboard {
     this.data = [];
     this.filteredData = [];
     this.charts = {};
-    this.provinces = [];
 
     this.initializeFilters();
     this.bindEvents();
@@ -13,84 +12,56 @@ class KepalaKeluargaDashboard {
   }
 
   initializeFilters() {
-    // Initialize filter values
     this.filters = {
-      regionType: "all",
-      province: "all",
-      sort: "total_desc",
+      regionType: document.getElementById("regionTypeFilter")?.value || "all",
+      province: document.getElementById("provinceFilter")?.value || "all",
+      sort: document.getElementById("sortFilter")?.value || "total_desc",
     };
   }
 
   bindEvents() {
-    // Filter change events
-    document
-      .getElementById("regionTypeFilter")
-      .addEventListener("change", () => {
-        this.handleFilterChange();
-      });
-
-    document.getElementById("provinceFilter").addEventListener("change", () => {
-      this.handleFilterChange();
-    });
-
-    document.getElementById("sortFilter").addEventListener("change", () => {
-      this.handleFilterChange();
-    });
-
-    // Refresh button
-    document.getElementById("refreshBtn").addEventListener("click", () => {
-      this.loadData(true);
-    });
+    document.getElementById("regionTypeFilter")?.addEventListener("change", () => this.handleFilterChange());
+    document.getElementById("provinceFilter")?.addEventListener("change", () => this.handleFilterChange());
+    document.getElementById("sortFilter")?.addEventListener("change", () => this.handleFilterChange());
+    document.getElementById("refreshBtn")?.addEventListener("click", () => this.loadData(true));
   }
 
   async loadData(forceRefresh = false) {
     try {
       this.showLoadingState();
-
-      // Load provinces for filter
-      await this.loadProvinces();
-
-      // Load kepala keluarga data
+      
       const response = await fetch(`${window.API_BASE_URL}kepala_keluarga.php`);
-      if (!response.ok) throw new Error("Failed to fetch data");
+      if (!response.ok) throw new Error("Gagal mengambil data dari server");
 
       const result = await response.json();
-      if (result.status === "success") {
+      if (result.status === "success" && Array.isArray(result.data)) {
         this.data = result.data;
-        this.applyFilters();
-        this.updateStats();
-        this.updateCharts();
-      } else {
-        throw new Error(result.message || "Failed to load data");
-      }
-    } catch (error) {
-      console.error("Error loading data:", error);
-      this.showErrorState(error.message);
-    }
-  }
-
-  async loadProvinces() {
-    try {
-      const response = await fetch(`${window.API_BASE_URL}provinces.php`);
-      if (!response.ok) throw new Error("Failed to fetch provinces");
-
-      const result = await response.json();
-      if (result.status === "success") {
-        this.provinces = result.data;
         this.populateProvinceFilter();
+        this.applyFilters();
+      } else {
+        throw new Error(result.message || "Format data tidak sesuai");
       }
     } catch (error) {
-      console.error("Error loading provinces:", error);
+      console.error("Error memuat data:", error);
+      this.showErrorState(error.message);
+    } finally {
+      this.hideLoadingState();
     }
   }
 
   populateProvinceFilter() {
     const select = document.getElementById("provinceFilter");
+    if (!select) return;
+    
     select.innerHTML = '<option value="all">Semua Provinsi</option>';
+    
+    const provinces = this.data
+      .filter(item => item.type === 'provinsi')
+      .sort((a, b) => a.name.localeCompare(b.name));
 
-    this.provinces.forEach((province) => {
+    provinces.forEach(province => {
       const option = document.createElement("option");
-      option.value = province.id;
+      option.value = province.kode;
       option.textContent = province.name;
       select.appendChild(option);
     });
@@ -100,75 +71,80 @@ class KepalaKeluargaDashboard {
     this.filters.regionType = document.getElementById("regionTypeFilter").value;
     this.filters.province = document.getElementById("provinceFilter").value;
     this.filters.sort = document.getElementById("sortFilter").value;
-
     this.applyFilters();
+  }
+
+  // PERBAIKAN UTAMA ADA DI FUNGSI INI
+  applyFilters() {
+    let tempData = [...this.data];
+
+    // 1. Filter berdasarkan Tipe Wilayah
+    if (this.filters.regionType === 'provinsi') {
+        tempData = tempData.filter(item => item.type === 'provinsi');
+    } else if (this.filters.regionType === 'kabupaten') {
+        tempData = tempData.filter(item => item.type === 'kabupaten');
+    } else if (this.filters.regionType === 'kota') {
+        tempData = tempData.filter(item => item.type === 'kota');
+    }
+    // Jika 'all', tidak ada filter tipe, semua akan diproses ke filter provinsi
+
+    // 2. Filter berdasarkan Provinsi (HANYA JIKA Tipe Wilayah BUKAN 'provinsi')
+    if (this.filters.regionType !== 'provinsi' && this.filters.province !== 'all') {
+      const provinceCodePrefix = String(this.filters.province).split('.')[0];
+      tempData = tempData.filter(item => 
+        // Hanya tampilkan kabupaten/kota dari provinsi yang dipilih
+        String(item.kode).startsWith(provinceCodePrefix + '.') && item.type !== 'provinsi'
+      );
+    } else if (this.filters.regionType === 'all' && this.filters.province === 'all') {
+      // Jika semua, defaultnya tampilkan semua kabupaten dan kota
+      tempData = tempData.filter(item => item.type === 'kabupaten' || item.type === 'kota');
+    }
+
+    // 3. Lakukan sorting
+    this.applySorting(tempData);
+    this.filteredData = tempData;
+
+    // 4. Update semua elemen UI
+    this.updateUI();
+  }
+
+  applySorting(data) {
+    const sortOption = this.filters.sort;
+    data.sort((a, b) => {
+      switch (sortOption) {
+        case 'total_desc': return b.total - a.total;
+        case 'total_asc': return a.total - b.total;
+        case 'name_asc': return a.name.localeCompare(b.name);
+        case 'name_desc': return b.name.localeCompare(a.name);
+        case 'laki_desc': return b.laki_laki - a.laki_laki;
+        case 'perempuan_desc': return b.perempuan - a.perempuan;
+        default: return 0;
+      }
+    });
+  }
+
+  updateUI() {
     this.updateStats();
     this.updateCharts();
+    const dataCountEl = document.getElementById("dataCount");
+    if(dataCountEl) dataCountEl.textContent = this.formatNumber(this.filteredData.length);
   }
 
-  applyFilters() {
-    this.filteredData = [...this.data];
-
-    // Apply region type filter
-    if (this.filters.regionType !== "all") {
-      this.filteredData = this.filteredData.filter((item) => {
-        return item.type === this.filters.regionType;
-      });
-    }
-
-    // Apply province filter
-    if (this.filters.province !== "all") {
-      this.filteredData = this.filteredData.filter((item) => {
-        return item.province_id === parseInt(this.filters.province);
-      });
-    }
-
-    // Apply sorting
-    this.applySorting();
-
-    // Update filter stats
-    document.getElementById("dataCount").textContent = this.filteredData.length;
-  }
-
-  applySorting() {
-    const sortMap = {
-      total_desc: (a, b) => b.total - a.total,
-      total_asc: (a, b) => a.total - b.total,
-      name_asc: (a, b) => a.name.localeCompare(b.name),
-      name_desc: (a, b) => b.name.localeCompare(a.name),
-      laki_desc: (a, b) => b.laki_laki - a.laki_laki,
-      perempuan_desc: (a, b) => b.perempuan - a.perempuan,
-    };
-
-    if (sortMap[this.filters.sort]) {
-      this.filteredData.sort(sortMap[this.filters.sort]);
-    }
+  calculateStats() {
+    // Statistik sekarang selalu menghitung dari data yang sudah terfilter
+    return this.filteredData.reduce((acc, item) => {
+      acc.lakiLaki += item.laki_laki || 0;
+      acc.perempuan += item.perempuan || 0;
+      acc.total += item.total || 0;
+      return acc;
+    }, { lakiLaki: 0, perempuan: 0, total: 0 });
   }
 
   updateStats() {
     const stats = this.calculateStats();
-
-    document.getElementById("statLakiLaki").innerHTML = this.formatNumber(
-      stats.lakiLaki
-    );
-    document.getElementById("statPerempuan").innerHTML = this.formatNumber(
-      stats.perempuan
-    );
-    document.getElementById("statTotal").innerHTML = this.formatNumber(
-      stats.total
-    );
-  }
-
-  calculateStats() {
-    return this.filteredData.reduce(
-      (acc, item) => {
-        acc.lakiLaki += parseInt(item.laki_laki || 0);
-        acc.perempuan += parseInt(item.perempuan || 0);
-        acc.total += parseInt(item.total || 0);
-        return acc;
-      },
-      { lakiLaki: 0, perempuan: 0, total: 0 }
-    );
+    document.getElementById("statLakiLaki").textContent = this.formatNumber(stats.lakiLaki);
+    document.getElementById("statPerempuan").textContent = this.formatNumber(stats.perempuan);
+    document.getElementById("statTotal").textContent = this.formatNumber(stats.total);
   }
 
   updateCharts() {
@@ -177,88 +153,35 @@ class KepalaKeluargaDashboard {
   }
 
   updateBarChart() {
-    const ctx = document.getElementById("barChart");
-    if (!ctx) return;
+    const canvas = document.getElementById("barChart");
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
 
-    // Destroy existing chart
-    if (this.charts.bar) {
-      this.charts.bar.destroy();
-    }
+    if (this.charts.bar) this.charts.bar.destroy();
 
-    // Prepare data (top 15 regions)
     const top15 = this.filteredData.slice(0, 15);
-    const labels = top15.map((item) => this.truncateLabel(item.name, 15));
-    const lakiLakiData = top15.map((item) => parseInt(item.laki_laki || 0));
-    const perempuanData = top15.map((item) => parseInt(item.perempuan || 0));
-
+    // Membersihkan label agar lebih pendek dan rapi
+    const labels = top15.map(item => this.truncateLabel(item.name.replace(/KAB. |KOTA |ADM. /g, ''), 15));
+    
     this.charts.bar = new Chart(ctx, {
       type: "bar",
       data: {
         labels: labels,
         datasets: [
-          {
-            label: "Kepala Keluarga Laki-laki",
-            data: lakiLakiData,
-            backgroundColor: "#2563eb",
-            borderColor: "#1d4ed8",
-            borderWidth: 1,
-          },
-          {
-            label: "Kepala Keluarga Perempuan",
-            data: perempuanData,
-            backgroundColor: "#dc2626",
-            borderColor: "#b91c1c",
-            borderWidth: 1,
-          },
+          { label: "Laki-laki", data: top15.map(item => item.laki_laki), backgroundColor: "#2563eb" },
+          { label: "Perempuan", data: top15.map(item => item.perempuan), backgroundColor: "#dc2626" },
         ],
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: function (value) {
-                return new Intl.NumberFormat("id-ID").format(value);
-              },
-            },
-          },
-          x: {
-            ticks: {
-              maxRotation: 45,
-              minRotation: 0,
-            },
-          },
-        },
-        plugins: {
-          legend: {
-            display: false, // Using custom legend
-          },
-          tooltip: {
-            callbacks: {
-              label: function (context) {
-                return (
-                  context.dataset.label +
-                  ": " +
-                  new Intl.NumberFormat("id-ID").format(context.parsed.y)
-                );
-              },
-            },
-          },
-        },
-      },
+      options: this.getChartOptions(),
     });
   }
 
   updatePieChart() {
-    const ctx = document.getElementById("pieChart");
-    if (!ctx) return;
+    const canvas = document.getElementById("pieChart");
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
 
-    // Destroy existing chart
-    if (this.charts.pie) {
-      this.charts.pie.destroy();
-    }
+    if (this.charts.pie) this.charts.pie.destroy();
 
     const stats = this.calculateStats();
 
@@ -266,87 +189,61 @@ class KepalaKeluargaDashboard {
       type: "doughnut",
       data: {
         labels: ["Kepala Keluarga Laki-laki", "Kepala Keluarga Perempuan"],
-        datasets: [
-          {
-            data: [stats.lakiLaki, stats.perempuan],
-            backgroundColor: ["#2563eb", "#dc2626"],
-            borderColor: ["#1d4ed8", "#b91c1c"],
-            borderWidth: 2,
-          },
-        ],
+        datasets: [{
+          data: [stats.lakiLaki, stats.perempuan],
+          backgroundColor: ["#2563eb", "#dc2626"],
+          borderColor: "#ffffff",
+          borderWidth: 2,
+        }],
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: "bottom",
-            labels: {
-              padding: 20,
-              usePointStyle: true,
-            },
-          },
-          tooltip: {
-            callbacks: {
-              label: function (context) {
+      options: this.getChartOptions(true),
+    });
+  }
+
+  getChartOptions(isPie = false) {
+    const options = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: isPie, position: 'bottom', labels: { padding: 20, usePointStyle: true } },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const value = context.parsed.y || context.parsed;
+              const label = context.dataset.label || context.label || '';
+              if (isPie) {
                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percentage = ((context.parsed * 100) / total).toFixed(1);
-                return (
-                  context.label +
-                  ": " +
-                  new Intl.NumberFormat("id-ID").format(context.parsed) +
-                  " (" +
-                  percentage +
-                  "%)"
-                );
-              },
+                if (total === 0) return `${label}: 0 (0%)`; // Menghindari pembagian dengan nol
+                const percentage = ((value * 100) / total).toFixed(1);
+                return `${label}: ${this.formatNumber(value)} (${percentage}%)`;
+              }
+              return `${label}: ${this.formatNumber(value)}`;
             },
           },
         },
       },
-    });
+      scales: isPie ? {} : {
+        y: { beginAtZero: true, ticks: { callback: (value) => this.formatNumber(value) } },
+        x: { ticks: { maxRotation: 45, minRotation: 0 } },
+      },
+    };
+    return options;
   }
 
-  showLoadingState() {
-    const loadingElements = document.querySelectorAll(".loading-spinner");
-    loadingElements.forEach((element) => {
-      element.style.display = "block";
-    });
-  }
-
-  hideLoadingState() {
-    const loadingElements = document.querySelectorAll(".loading-spinner");
-    loadingElements.forEach((element) => {
-      element.style.display = "none";
-    });
-  }
-
+  showLoadingState() { document.querySelectorAll(".loading-spinner").forEach(el => el.style.display = 'block'); }
+  hideLoadingState() { document.querySelectorAll(".loading-spinner").forEach(el => el.style.display = 'none'); }
   showErrorState(message) {
     this.hideLoadingState();
-
-    // Show error in stats
-    ["statLakiLaki", "statPerempuan", "statTotal"].forEach((id) => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.innerHTML =
-          '<span style="color: #dc2626; font-size: 14px;">Error loading data</span>';
-      }
+    const errorHtml = `<span style="color: #dc2626; font-size: 14px;">Error: ${message}</span>`;
+    ["statLakiLaki", "statPerempuan", "statTotal"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = errorHtml;
     });
-
-    console.error("Dashboard Error:", message);
   }
-
-  formatNumber(number) {
-    return new Intl.NumberFormat("id-ID").format(number || 0);
-  }
-
-  truncateLabel(label, maxLength) {
-    if (label.length <= maxLength) return label;
-    return label.substring(0, maxLength - 3) + "...";
-  }
+  formatNumber(number) { return new Intl.NumberFormat("id-ID").format(number || 0); }
+  truncateLabel(label, maxLength) { return label.length > maxLength ? label.substring(0, maxLength - 3) + "..." : label; }
 }
 
-// Initialize dashboard when DOM is loaded
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
   window.kepalaKeluargaDashboard = new KepalaKeluargaDashboard();
 });

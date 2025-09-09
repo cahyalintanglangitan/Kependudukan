@@ -4,9 +4,6 @@
 // Headers untuk API
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Max-Age: 3600");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 // Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
@@ -14,373 +11,132 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit();
 }
 
-// Error reporting untuk debugging
+// Set error reporting untuk debugging
 error_reporting(E_ALL);
-ini_set('display_errors', 0); // Jangan tampilkan error di output
+ini_set('display_errors', 1); // Aktifkan di development untuk melihat error
 ini_set('log_errors', 1);
 
 try {
-    // Include database config
-    $config_path = __DIR__ . '/../config/database.php';
-    if (!file_exists($config_path)) {
-        throw new Exception("Database configuration file not found at: $config_path");
-    }
+    // Include config dan database class
+    // Pastikan path ini benar sesuai struktur proyek Anda
+    require_once __DIR__ . '/../config/database.php';
     
-    include_once $config_path;
-    
-    // Test database connection first
-    $database = Database::getInstance();
+    // Buat koneksi database
+    $database = new Database();
     $db = $database->getConnection();
     
-    if (!$db) {
-        throw new Exception("Could not establish database connection");
-    }
+    // Default action adalah 'all' yang akan digunakan oleh frontend
+    $action = isset($_GET['action']) ? trim($_GET['action']) : 'all';
     
-    // Check if required tables exist
-    if (!$database->tableExists('kepala_keluarga')) {
-        throw new Exception("Table 'kepala_keluarga' does not exist. Please run the database setup script first.");
-    }
-    
-    // Get action parameter
-    $action = isset($_GET['action']) ? trim($_GET['action']) : 'list';
-    
-    // Route to appropriate function
+    // Route ke fungsi yang sesuai
     switch($action) {
         case 'stats':
             getKepalaKeluargaStats($db);
             break;
-        case 'distribution':
+        case 'distribution': // Untuk chart per provinsi
             getDistributionByProvince($db);
             break;
-        case 'by_province':
-            getDataByProvince($db);
-            break;
-        case 'by_gender':
-            getDataByGender($db);
-            break;
-        case 'test':
-            testAPI($db);
-            break;
-        case 'list':
+        case 'all': // Mengembalikan semua data untuk diolah di frontend
         default:
-            getKepalaKeluargaList($db);
+            getAllKepalaKeluarga($db);
             break;
     }
     
 } catch(Exception $e) {
-    // Log error
-    error_log("API Error: " . $e->getMessage() . " in " . __FILE__ . " on line " . __LINE__);
-    
-    // Return error response
+    // Tangani error dan kirim response JSON yang informatif
     http_response_code(500);
     echo json_encode([
-        'success' => false,
-        'error' => true,
+        'status' => 'error',
         'message' => $e->getMessage(),
-        'debug_info' => [
-            'file' => basename(__FILE__),
-            'timestamp' => date('Y-m-d H:i:s'),
-            'action' => isset($action) ? $action : 'unknown',
-            'method' => $_SERVER['REQUEST_METHOD']
-        ]
+        'file' => basename(__FILE__),
+        'line' => $e->getLine()
     ], JSON_PRETTY_PRINT);
 }
 
 /**
- * Get statistics for Kepala Keluarga
+ * Mengambil statistik total Kepala Keluarga dari seluruh kabupaten/kota.
+ * Ini mencegah penghitungan ganda dari baris total provinsi.
  */
 function getKepalaKeluargaStats($db) {
-    try {
-        $stats = [];
-        
-        // Total Kepala Keluarga
-        $query = "SELECT COUNT(*) as total FROM kepala_keluarga WHERE status_aktif = 1";
-        $stmt = $db->prepare($query);
-        $stmt->execute();
-        $result = $stmt->fetch();
-        $stats['total_kepala_keluarga'] = (int) ($result['total'] ?? 0);
-        
-        // Kepala Keluarga Laki-laki
-        $query = "SELECT COUNT(*) as total FROM kepala_keluarga WHERE jenis_kelamin = 'L' AND status_aktif = 1";
-        $stmt = $db->prepare($query);
-        $stmt->execute();
-        $result = $stmt->fetch();
-        $stats['kepala_keluarga_laki_laki'] = (int) ($result['total'] ?? 0);
-        
-        // Kepala Keluarga Perempuan
-        $query = "SELECT COUNT(*) as total FROM kepala_keluarga WHERE jenis_kelamin = 'P' AND status_aktif = 1";
-        $stmt = $db->prepare($query);
-        $stmt->execute();
-        $result = $stmt->fetch();
-        $stats['kepala_keluarga_perempuan'] = (int) ($result['total'] ?? 0);
-        
-        // Additional stats
-        $query = "SELECT 
-                    AVG(umur) as rata_rata_umur,
-                    MIN(umur) as umur_minimum,
-                    MAX(umur) as umur_maximum
-                  FROM kepala_keluarga 
-                  WHERE status_aktif = 1 AND umur IS NOT NULL";
-        $stmt = $db->prepare($query);
-        $stmt->execute();
-        $result = $stmt->fetch();
-        
-        $stats['rata_rata_umur'] = round((float) ($result['rata_rata_umur'] ?? 0), 1);
-        $stats['umur_minimum'] = (int) ($result['umur_minimum'] ?? 0);
-        $stats['umur_maximum'] = (int) ($result['umur_maximum'] ?? 0);
-        $stats['updated_at'] = date('Y-m-d H:i:s');
-        
-        echo json_encode([
-            'success' => true,
-            'data' => $stats,
-            'message' => 'Statistics retrieved successfully'
-        ], JSON_PRETTY_PRINT);
-        
-    } catch(Exception $e) {
-        throw new Exception("Error getting statistics: " . $e->getMessage());
-    }
+    // Query untuk menjumlahkan data dari semua KABUPATEN dan KOTA
+    // `KODE WILAYAH` LIKE '%.__'` memastikan kita hanya mengambil data level kab/kota (misal 11.01, 11.71)
+    $query = "
+        SELECT 
+            SUM(CAST(REPLACE(`LAKI-LAKI`, '.', '') AS UNSIGNED)) as total_laki_laki,
+            SUM(CAST(REPLACE(`PEREMPUAN`, '.', '') AS UNSIGNED)) as total_perempuan,
+            SUM(CAST(REPLACE(`JUMLAH`, '.', '') AS UNSIGNED)) as total_jumlah
+        FROM kepala_keluarga
+        WHERE `NAMA WILAYAH` LIKE 'KAB.%' OR `NAMA WILAYAH` LIKE 'KOTA%';
+    ";
+    
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    echo json_encode([
+        'status' => 'success',
+        'data' => [
+            'lakiLaki' => (int)$result['total_laki_laki'],
+            'perempuan' => (int)$result['total_perempuan'],
+            'total' => (int)$result['total_jumlah']
+        ]
+    ], JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK);
 }
 
 /**
- * Get distribution by province
+ * Mengambil data agregat per provinsi untuk chart distribusi.
  */
 function getDistributionByProvince($db) {
-    try {
-        $query = "SELECT 
-                    COALESCE(p.nama_provinsi, 'Tidak Diketahui') as nama_provinsi,
-                    COUNT(kk.id) as jumlah_kk,
-                    COUNT(CASE WHEN kk.jenis_kelamin = 'L' THEN 1 END) as laki_laki,
-                    COUNT(CASE WHEN kk.jenis_kelamin = 'P' THEN 1 END) as perempuan,
-                    ROUND(AVG(kk.umur), 1) as rata_rata_umur
-                  FROM kepala_keluarga kk
-                  LEFT JOIN provinsi p ON kk.id_provinsi = p.id
-                  WHERE kk.status_aktif = 1
-                  GROUP BY p.id, p.nama_provinsi
-                  ORDER BY jumlah_kk DESC
-                  LIMIT 15";
-        
-        $stmt = $db->prepare($query);
-        $stmt->execute();
-        $result = $stmt->fetchAll();
-        
-        echo json_encode([
-            'success' => true,
-            'data' => $result,
-            'total_records' => count($result),
-            'message' => 'Distribution data retrieved successfully'
-        ], JSON_PRETTY_PRINT);
-        
-    } catch(Exception $e) {
-        throw new Exception("Error getting distribution data: " . $e->getMessage());
-    }
+    // Query untuk mengambil data provinsi saja (kode wilayah diakhiri dengan .00)
+    $query = "
+        SELECT 
+            `NAMA WILAYAH` as name,
+            CAST(REPLACE(`LAKI-LAKI`, '.', '') AS UNSIGNED) as laki_laki,
+            CAST(REPLACE(`PEREMPUAN`, '.', '') AS UNSIGNED) as perempuan,
+            CAST(REPLACE(`JUMLAH`, '.', '') AS UNSIGNED) as total
+        FROM kepala_keluarga
+        WHERE `KODE WILAYAH` LIKE '%.00'
+        ORDER BY total DESC;
+    ";
+    
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode([
+        'status' => 'success',
+        'data' => $result
+    ], JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK);
 }
 
-/**
- * Get data by specific province
- */
-function getDataByProvince($db) {
-    try {
-        $provinsi_id = isset($_GET['provinsi_id']) ? (int)$_GET['provinsi_id'] : null;
-        $limit = isset($_GET['limit']) ? min(100, max(1, (int)$_GET['limit'])) : 20;
-        
-        $whereClause = "WHERE kk.status_aktif = 1";
-        $params = [];
-        
-        if ($provinsi_id) {
-            $whereClause .= " AND kk.id_provinsi = :provinsi_id";
-            $params[':provinsi_id'] = $provinsi_id;
-        }
-        
-        $query = "SELECT 
-                    kk.id,
-                    kk.no_kk,
-                    kk.nama_lengkap,
-                    kk.nik,
-                    kk.jenis_kelamin,
-                    kk.umur,
-                    kk.alamat,
-                    COALESCE(p.nama_provinsi, 'Tidak Diketahui') as nama_provinsi,
-                    COALESCE(k.nama_kabupaten, 'Tidak Diketahui') as nama_kabupaten,
-                    COALESCE(kec.nama_kecamatan, 'Tidak Diketahui') as nama_kecamatan,
-                    kk.created_at
-                  FROM kepala_keluarga kk
-                  LEFT JOIN provinsi p ON kk.id_provinsi = p.id
-                  LEFT JOIN kabupaten k ON kk.id_kabupaten = k.id
-                  LEFT JOIN kecamatan kec ON kk.id_kecamatan = kec.id
-                  $whereClause
-                  ORDER BY kk.created_at DESC
-                  LIMIT $limit";
-        
-        $stmt = $db->prepare($query);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-        $stmt->execute();
-        $result = $stmt->fetchAll();
-        
-        echo json_encode([
-            'success' => true,
-            'data' => $result,
-            'total_records' => count($result),
-            'filters' => ['provinsi_id' => $provinsi_id],
-            'message' => 'Province data retrieved successfully'
-        ], JSON_PRETTY_PRINT);
-        
-    } catch(Exception $e) {
-        throw new Exception("Error getting province data: " . $e->getMessage());
-    }
-}
 
 /**
- * Get data by gender
+ * Mengambil semua data dari tabel kepala_keluarga.
+ * Frontend JS akan melakukan filter dan sorting.
  */
-function getDataByGender($db) {
-    try {
-        $query = "SELECT 
-                    CASE 
-                        WHEN jenis_kelamin = 'L' THEN 'Laki-laki'
-                        WHEN jenis_kelamin = 'P' THEN 'Perempuan'
-                        ELSE 'Tidak Diketahui'
-                    END as jenis_kelamin,
-                    jenis_kelamin as kode_kelamin,
-                    COUNT(*) as jumlah,
-                    ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM kepala_keluarga WHERE status_aktif = 1)), 2) as persentase,
-                    ROUND(AVG(umur), 1) as rata_rata_umur
-                  FROM kepala_keluarga 
-                  WHERE status_aktif = 1
-                  GROUP BY jenis_kelamin
-                  ORDER BY jumlah DESC";
-        
-        $stmt = $db->prepare($query);
-        $stmt->execute();
-        $result = $stmt->fetchAll();
-        
-        echo json_encode([
-            'success' => true,
-            'data' => $result,
-            'message' => 'Gender data retrieved successfully'
-        ], JSON_PRETTY_PRINT);
-        
-    } catch(Exception $e) {
-        throw new Exception("Error getting gender data: " . $e->getMessage());
-    }
-}
+function getAllKepalaKeluarga($db) {
+    $query = "
+        SELECT 
+            `NAMA WILAYAH` as name,
+            `KODE WILAYAH` as kode,
+            (CASE 
+                WHEN `NAMA WILAYAH` LIKE 'KAB.%' THEN 'kabupaten'
+                WHEN `NAMA WILAYAH` LIKE 'KOTA%' THEN 'kota'
+                ELSE 'provinsi'
+            END) as type,
+            CAST(REPLACE(`LAKI-LAKI`, '.', '') AS UNSIGNED) as laki_laki,
+            CAST(REPLACE(`PEREMPUAN`, '.', '') AS UNSIGNED) as perempuan,
+            CAST(REPLACE(`JUMLAH`, '.', '') AS UNSIGNED) as total
+        FROM kepala_keluarga;
+    ";
 
-/**
- * Get list of Kepala Keluarga with pagination
- */
-function getKepalaKeluargaList($db) {
-    try {
-        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-        $limit = isset($_GET['limit']) ? min(100, max(1, (int)$_GET['limit'])) : 20;
-        $offset = ($page - 1) * $limit;
-        
-        // Get total count
-        $countQuery = "SELECT COUNT(*) as total FROM kepala_keluarga WHERE status_aktif = 1";
-        $countStmt = $db->prepare($countQuery);
-        $countStmt->execute();
-        $totalRecords = (int) $countStmt->fetch()['total'];
-        
-        // Get paginated data
-        $query = "SELECT 
-                    kk.id,
-                    kk.no_kk,
-                    kk.nama_lengkap,
-                    kk.nik,
-                    kk.jenis_kelamin,
-                    kk.umur,
-                    kk.alamat,
-                    kk.rt,
-                    kk.rw,
-                    COALESCE(p.nama_provinsi, 'Tidak Diketahui') as nama_provinsi,
-                    COALESCE(k.nama_kabupaten, 'Tidak Diketahui') as nama_kabupaten,
-                    COALESCE(kec.nama_kecamatan, 'Tidak Diketahui') as nama_kecamatan,
-                    kk.created_at
-                  FROM kepala_keluarga kk
-                  LEFT JOIN provinsi p ON kk.id_provinsi = p.id
-                  LEFT JOIN kabupaten k ON kk.id_kabupaten = k.id
-                  LEFT JOIN kecamatan kec ON kk.id_kecamatan = kec.id
-                  WHERE kk.status_aktif = 1
-                  ORDER BY kk.created_at DESC
-                  LIMIT :limit OFFSET :offset";
-        
-        $stmt = $db->prepare($query);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->execute();
-        $result = $stmt->fetchAll();
-        
-        echo json_encode([
-            'success' => true,
-            'data' => $result,
-            'pagination' => [
-                'current_page' => $page,
-                'total_pages' => ceil($totalRecords / $limit),
-                'total_records' => $totalRecords,
-                'per_page' => $limit,
-                'has_next' => $page < ceil($totalRecords / $limit),
-                'has_prev' => $page > 1
-            ],
-            'message' => 'Data retrieved successfully'
-        ], JSON_PRETTY_PRINT);
-        
-    } catch(Exception $e) {
-        throw new Exception("Error getting kepala keluarga list: " . $e->getMessage());
-    }
-}
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-/**
- * Test API functionality
- */
-function testAPI($db) {
-    try {
-        $tests = [];
-        
-        // Test 1: Database connection
-        $tests['database_connection'] = [
-            'status' => 'success',
-            'message' => 'Database connected successfully'
-        ];
-        
-        // Test 2: Table exists
-        $database = Database::getInstance();
-        if ($database->tableExists('kepala_keluarga')) {
-            $tests['table_kepala_keluarga'] = [
-                'status' => 'success',
-                'message' => 'Table kepala_keluarga exists'
-            ];
-        } else {
-            $tests['table_kepala_keluarga'] = [
-                'status' => 'error',
-                'message' => 'Table kepala_keluarga not found'
-            ];
-        }
-        
-        // Test 3: Sample query
-        try {
-            $stmt = $db->prepare("SELECT COUNT(*) as total FROM kepala_keluarga LIMIT 1");
-            $stmt->execute();
-            $result = $stmt->fetch();
-            $tests['sample_query'] = [
-                'status' => 'success',
-                'message' => "Query successful, found {$result['total']} records"
-            ];
-        } catch(Exception $e) {
-            $tests['sample_query'] = [
-                'status' => 'error',
-                'message' => 'Query failed: ' . $e->getMessage()
-            ];
-        }
-        
-        echo json_encode([
-            'success' => true,
-            'message' => 'API test completed',
-            'tests' => $tests,
-            'timestamp' => date('Y-m-d H:i:s')
-        ], JSON_PRETTY_PRINT);
-        
-    } catch(Exception $e) {
-        throw new Exception("Error running API test: " . $e->getMessage());
-    }
+    echo json_encode([
+        'status' => 'success',
+        'data' => $result
+    ], JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK);
 }
 ?>
