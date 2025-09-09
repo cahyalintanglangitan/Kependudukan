@@ -24,8 +24,8 @@ window.Sidebar = {
                 '/dashboard/akta': 'nav-akta',
                 '/dashboard/demografi': 'nav-demografi', 
                 '/dashboard/disabilitas': 'nav-disabilitas',
-                '/dashboard/kelompok-umur': 'nav-kelompok-umur',
-                '/dashboard/kepala-keluarga': 'nav-kepala-keluarga',
+                '/dashboard/kelompok_umur': 'nav-kelompok_umur',
+                '/dashboard/kepala_keluarga': 'nav-kepala_keluarga',
                 '/tools/ai': 'nav-ai'
             };
             

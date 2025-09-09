@@ -16,15 +16,15 @@ $menu_items = [
         'label' => 'Disabilitas',
         'active' => $current_file === 'disabilitas'
     ],
-    'kelompok-umur' => [
+    'kelompok_umur' => [
         'icon' => 'fas fa-calendar-alt',
         'label' => 'Kelompok Umur',
-        'active' => $current_file === 'kelompok-umur'
+        'active' => $current_file === 'kelompok_umur'
     ],
-    'kepala-keluarga' => [
+    'kepala_keluarga' => [
         'icon' => 'fas fa-user-tie',
         'label' => 'Kepala Keluarga',
-        'active' => $current_file === 'kepala-keluarga'
+        'active' => $current_file === 'kepala_keluarga'
     ]
 ];
 ?>
