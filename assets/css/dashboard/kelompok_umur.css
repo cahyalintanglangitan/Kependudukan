@@ -1,0 +1,394 @@
+/* assets/css/dashboard/kelompok_umur.css */
+
+/* Kelompok Umur Specific Styles */
+.kelompok-umur-tabs {
+  margin-top: 30px;
+}
+
+.kelompok-umur-tabs .tab-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #e0e6ed;
+}
+
+.kelompok-umur-tabs .tab-button {
+  padding: 12px 24px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px 8px 0 0;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kelompok-umur-tabs .tab-button:hover {
+  background: #f1f5f9;
+  color: #3b82f6;
+}
+
+.kelompok-umur-tabs .tab-button.active {
+  background: #3b82f6;
+  color: white;
+  border-bottom: 2px solid #3b82f6;
+}
+
+.kelompok-umur-tabs .tab-content {
+  display: none;
+}
+
+.kelompok-umur-tabs .tab-content.active {
+  display: block;
+}
+
+/* Age Group Specific Stats Cards */
+.stats-grid .stat-card.balita {
+  background: linear-gradient(135deg, #ff6b6b, #ff5252);
+  color: white;
+}
+
+.stats-grid .stat-card.anak {
+  background: linear-gradient(135deg, #4ecdc4, #26a69a);
+  color: white;
+}
+
+.stats-grid .stat-card.dewasa {
+  background: linear-gradient(135deg, #45b7d1, #2196f3);
+  color: white;
+}
+
+.stats-grid .stat-card.lansia {
+  background: linear-gradient(135deg, #96ceb4, #4caf50);
+  color: white;
+}
+
+.stats-grid .stat-card.age-0-4 {
+  background: linear-gradient(135deg, #ff6b6b, #ff5252);
+  color: white;
+}
+
+.stats-grid .stat-card.age-5-9 {
+  background: linear-gradient(135deg, #4ecdc4, #26a69a);
+  color: white;
+}
+
+.stats-grid .stat-card.age-10-14 {
+  background: linear-gradient(135deg, #45b7d1, #2196f3);
+  color: white;
+}
+
+.stats-grid .stat-card.age-15-19 {
+  background: linear-gradient(135deg, #96ceb4, #4caf50);
+  color: white;
+}
+
+.stats-grid .stat-card.top-balita {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  color: white;
+}
+
+.stats-grid .stat-card.top-anak {
+  background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+  color: white;
+}
+
+.stats-grid .stat-card.top-dewasa {
+  background: linear-gradient(135deg, #3f51b5, #303f9f);
+  color: white;
+}
+
+.stats-grid .stat-card.top-lansia {
+  background: linear-gradient(135deg, #607d8b, #455a64);
+  color: white;
+}
+
+/* Chart Containers */
+.kelompok-chart-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin: 30px 0;
+}
+
+.age-distribution-container {
+  margin: 30px 0;
+}
+
+.age-chart-full {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.age-chart-full h3 {
+  margin: 0 0 20px 0;
+  color: #1e293b;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.heatmap-container {
+  margin: 30px 0;
+}
+
+.heatmap-chart {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.heatmap-chart h3 {
+  margin: 0 0 20px 0;
+  color: #1e293b;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Comparison Charts */
+.comparison-chart {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.comparison-chart h3 {
+  margin: 0 0 20px 0;
+  color: #1e293b;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.chart-container {
+  position: relative;
+  height: 400px;
+  width: 100%;
+}
+
+/* Table Styles */
+.data-table-container {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin: 30px 0;
+}
+
+.table-controls-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.search-container,
+.sort-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-container label,
+.sort-container label {
+  font-weight: 500;
+  color: #374151;
+  min-width: fit-content;
+}
+
+.search-input {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 200px;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.sort-select {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  min-width: 180px;
+  transition: border-color 0.2s;
+}
+
+.sort-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.export-controls .btn-export {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.export-controls .btn-export:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+}
+
+.table-responsive {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.data-table thead th {
+  background: #f9fafb;
+  color: #374151;
+  font-weight: 600;
+  padding: 12px 8px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.data-table tbody td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
+  text-align: right;
+}
+
+.data-table tbody td:first-child {
+  text-align: left;
+  font-weight: 500;
+}
+
+.data-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Stats Card Enhancements */
+.stat-card .percentage {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-top: 4px;
+}
+
+.stat-card .count {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-top: 4px;
+}
+
+/* Loading States */
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f4f6;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .kelompok-chart-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .kelompok-umur-tabs .tab-buttons {
+    flex-direction: column;
+  }
+
+  .kelompok-umur-tabs .tab-button {
+    justify-content: center;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+  }
+
+  .table-controls-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-container,
+  .sort-container {
+    justify-content: space-between;
+  }
+
+  .search-input,
+  .sort-select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .chart-container {
+    height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .data-table {
+    font-size: 12px;
+  }
+
+  .data-table thead th,
+  .data-table tbody td {
+    padding: 8px 4px;
+  }
+
+  .comparison-chart,
+  .age-chart-full,
+  .heatmap-chart,
+  .data-table-container {
+    padding: 15px;
+  }
+}
