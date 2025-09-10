@@ -21,62 +21,61 @@
         
         <!-- Main Content -->
         <div class="main-content">
-            <!-- Header -->
-            <!-- Page Header (simple seperti disabilitas) -->
-<div class="page-header">
-    <h1>Data Demografi</h1>
-    <p>Distribusi populasi berdasarkan jenis kelamin per wilayah</p>
-</div>
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>Data Demografi</h1>
+                <p>Distribusi populasi berdasarkan jenis kelamin per wilayah</p>
+            </div>
 
-            <!-- Filter Controls (sama seperti disabilitas) -->
-<div class="filter-controls">
-    <div class="filter-title">
-        <i class="fas fa-filter"></i>
-        Filter Data Demografi
-    </div>
-    
-    <div class="filter-group">
-        <label for="regionTypeFilter">Tipe Wilayah</label>
-        <select id="regionTypeFilter">
-            <option value="all">Semua Wilayah</option>
-            <option value="province">Provinsi</option>
-            <option value="kabupaten">Kabupaten/Kota</option>
-            <option value="kecamatan">Kecamatan</option>
-            <option value="desa">Desa/Kelurahan</option>
-        </select>
-    </div>
-    
-    <div class="filter-group">
-        <label for="provinceFilter">Pilih Provinsi</label>
-        <select id="provinceFilter">
-            <option value="all">Semua Provinsi</option>
-        </select>
-    </div>
+            <!-- Filter Controls -->
+            <div class="filter-controls">
+                <div class="filter-title">
+                    <i class="fas fa-filter"></i>
+                    Filter Data Demografi
+                </div>
+                
+                <div class="filter-group">
+                    <label for="regionTypeFilter">Tipe Wilayah</label>
+                    <select id="regionTypeFilter">
+                        <option value="all">Semua Wilayah</option>
+                        <option value="province">Provinsi</option>
+                        <option value="kabupaten">Kabupaten/Kota</option>
+                        <option value="kecamatan">Kecamatan</option>
+                        <option value="desa">Desa/Kelurahan</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="provinceFilter">Pilih Provinsi</label>
+                    <select id="provinceFilter">
+                        <option value="all">Semua Provinsi</option>
+                    </select>
+                </div>
 
-    <div class="filter-group">
-        <label for="sortFilter">Urutkan Berdasarkan</label>
-        <select id="sortFilter">
-            <option value="total_desc">Total Populasi (Tertinggi)</option>
-            <option value="total_asc">Total Populasi (Terendah)</option>
-            <option value="laki_laki_desc">Laki-laki (Tertinggi)</option>
-            <option value="perempuan_desc">Perempuan (Tertinggi)</option>
-            <option value="name_asc">Nama Wilayah (A-Z)</option>
-            <option value="name_desc">Nama Wilayah (Z-A)</option>
-        </select>
-    </div>
+                <div class="filter-group">
+                    <label for="sortFilter">Urutkan Berdasarkan</label>
+                    <select id="sortFilter">
+                        <option value="total_desc">Total Populasi (Tertinggi)</option>
+                        <option value="total_asc">Total Populasi (Terendah)</option>
+                        <option value="laki_laki_desc">Laki-laki (Tertinggi)</option>
+                        <option value="perempuan_desc">Perempuan (Tertinggi)</option>
+                        <option value="name_asc">Nama Wilayah (A-Z)</option>
+                        <option value="name_desc">Nama Wilayah (Z-A)</option>
+                    </select>
+                </div>
 
-    <div class="filter-group">
-        <label>&nbsp;</label>
-        <button id="refreshBtn" class="btn-refresh">
-            <i class="fas fa-sync-alt"></i>
-            Refresh Data
-        </button>
-    </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button id="refreshBtn" class="btn-refresh">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh Data
+                    </button>
+                </div>
 
-    <div class="filter-stats" id="filterStats">
-        Menampilkan <span id="dataCount">0</span> wilayah
-    </div>
-</div>
+                <div class="filter-stats" id="filterStats">
+                    Menampilkan <span id="dataCount">0</span> wilayah
+                </div>
+            </div>
 
             <!-- Statistics Cards -->
             <div class="row mb-4">
@@ -92,9 +91,7 @@
                                         <div class="loading-spinner"></div>
                                     </div>
                                 </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-male fa-2x text-primary"></i>
-                                </div>
+                                <!-- Icon removed -->
                             </div>
                         </div>
                     </div>
@@ -112,9 +109,7 @@
                                         <div class="loading-spinner"></div>
                                     </div>
                                 </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-female fa-2x text-success"></i>
-                                </div>
+                                <!-- Icon removed -->
                             </div>
                         </div>
                     </div>
@@ -132,9 +127,7 @@
                                         <div class="loading-spinner"></div>
                                     </div>
                                 </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-users fa-2x text-info"></i>
-                                </div>
+                                <!-- Icon removed -->
                             </div>
                         </div>
                     </div>
@@ -220,32 +213,46 @@
                 </div>
             </div>
 
-            <!-- Data Table (Optional) -->
+            <!-- Data Table -->
             <div class="row">
                 <div class="col-12">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Data Detail Demografi</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                            <th>Kode</th>
-                                            <th>Wilayah</th>
-                                            <th>Laki-laki</th>
-                                            <th>Perempuan</th>
-                                            <th>Total</th>
-                                            <th>% Laki-laki</th>
-                                            <th>% Perempuan</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="dataTableBody">
-                                        <!-- Data will be populated by JavaScript -->
-                                    </tbody>
-                                </table>
+                    <div class="data-table-container">
+                        <!-- Table Controls Header - Style seperti Akta -->
+                        <div class="table-controls-header">
+                            <div class="search-container">
+                                <label for="searchWilayah">Cari:</label>
+                                <input type="text" id="searchWilayah" placeholder="Cari wilayah..." class="search-input">
                             </div>
+                            <div class="sort-container">
+                                <label for="sortFilter">Urutkan:</label>
+                                <select id="sortFilterTable" class="sort-select">
+                                    <option value="kode_asc">Kode Wilayah A-Z</option>
+                                    <option value="kode_desc">Kode Wilayah Z-A</option>
+                                    <option value="wilayah_asc">Wilayah A-Z</option>
+                                    <option value="wilayah_desc">Wilayah Z-A</option>
+                                    <option value="laki_laki_desc">Laki-laki Tertinggi</option>
+                                    <option value="laki_laki_asc">Laki-laki Terendah</option>
+                                    <option value="perempuan_desc">Perempuan Tertinggi</option>
+                                    <option value="perempuan_asc">Perempuan Terendah</option>
+                                    <option value="total_desc" selected>Total Tertinggi</option>
+                                    <option value="total_asc">Total Terendah</option>
+                                </select>
+                            </div>
+                            <div class="export-controls">
+                                <button class="btn-refresh" id="refreshTableBtn">
+                                    <i class="fas fa-sync-alt"></i>
+                                    Refresh
+                                </button>
+                                <button class="btn-export" id="exportBtn">
+                                    <i class="fas fa-download"></i>
+                                    Export CSV
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Table Content -->
+                        <div id="demografiTable">
+                            <!-- Table will be populated by JavaScript -->
                         </div>
                     </div>
                 </div>

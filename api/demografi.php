@@ -92,8 +92,6 @@ try {
             $sql .= " ORDER BY JUMLAH DESC";
     }
 
-    $sql .= " LIMIT " . $limit;
-
     // Execute query
     $stmt = $db->prepare($sql);
     $stmt->execute($params);

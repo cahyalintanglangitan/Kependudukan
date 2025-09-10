@@ -1,4 +1,4 @@
-/* assets/css/dashboard/demografi.css - Demografi page specific styles */
+/* assets/css/dashboard/demografi.css - Demografi page complete styles */
 
 /* Page theme colors */
 :root {
@@ -11,7 +11,7 @@
 
 /* Main page background */
 .demografi-page {
-    background: #ffffff; /* Same as disabilitas */
+    background: #ffffff;
 }
 
 /* Enhanced stat cards for demografi */
@@ -76,22 +76,9 @@
     border-top-color: var(--card-color, #3498db);
 }
 
-/* Mobile optimizations for demografi */
-@media (max-width: 768px) {
-    .demografi-page .chart-legend {
-        padding: 10px;
-    }
-    
-    .demografi-page .legend-item {
-        font-size: 11px;
-        padding: 3px 8px;
-    }
-}
-
-/* Modern Filter Controls - Same as disabilitas */
-
+/* Modern Filter Controls */
 .filter-controls {
-    background: #f8f9fa; /* Light gray background */
+    background: #f8f9fa;
     border-radius: 16px;
     padding: 24px;
     margin: 25px 0;
@@ -120,7 +107,7 @@
 /* Filter Title */
 .filter-title {
     width: 100%;
-    color: #495057; /* Dark text instead of white */
+    color: #495057;
     font-size: 16px;
     font-weight: 700;
     margin-bottom: 8px;
@@ -145,7 +132,7 @@
 }
 
 .filter-group label {
-    color: #6c757d; /* Gray text instead of white */
+    color: #6c757d;
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
@@ -189,8 +176,8 @@
     transform: translateY(-2px);
 }
 
-/* Refresh Button Styling */
-.btn-refresh {
+/* Refresh Button Styling for Filter Controls */
+.filter-controls .btn-refresh {
     background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     border: none;
     border-radius: 12px;
@@ -211,7 +198,7 @@
     overflow: hidden;
 }
 
-.btn-refresh::before {
+.filter-controls .btn-refresh::before {
     content: '';
     position: absolute;
     top: 0;
@@ -222,36 +209,36 @@
     transition: left 0.5s;
 }
 
-.btn-refresh:hover::before {
+.filter-controls .btn-refresh:hover::before {
     left: 100%;
 }
 
-.btn-refresh:hover {
+.filter-controls .btn-refresh:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
     background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
 }
 
-.btn-refresh:active {
+.filter-controls .btn-refresh:active {
     transform: translateY(-1px);
     box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
 }
 
-.btn-refresh i {
+.filter-controls .btn-refresh i {
     font-size: 16px;
     transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.btn-refresh:hover i {
+.filter-controls .btn-refresh:hover i {
     transform: rotate(180deg);
 }
 
 /* Filter Stats */
 .filter-stats {
-    background: rgba(248, 249, 250, 0.8); /* Light background */
+    background: rgba(248, 249, 250, 0.8);
     border-radius: 8px;
     padding: 8px 12px;
-    color: #495057; /* Dark text */
+    color: #495057;
     font-size: 12px;
     border: 1px solid #dee2e6;
     backdrop-filter: blur(5px);
@@ -292,49 +279,291 @@
     animation: spin 1s linear infinite;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .filter-controls {
-        flex-direction: column;
-        gap: 16px;
-        padding: 20px;
-    }
-    
-    .filter-group {
-        width: 100%;
-        min-width: auto;
-    }
-    
-    .filter-controls select {
-        width: 100%;
-        min-width: auto;
-    }
-    
-    .btn-refresh {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .filter-title {
-        text-align: center;
-    }
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-@media (max-width: 480px) {
-    .filter-controls {
-        padding: 16px;
-        margin: 15px 0;
-    }
-    
-    .filter-controls select {
-        padding: 10px 14px;
-        font-size: 13px;
-    }
-    
-    .btn-refresh {
-        padding: 10px 16px;
-        font-size: 13px;
-    }
+/* Data Table Container - Style seperti Akta */
+.data-table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+/* Table Controls Header - Style seperti Akta */
+.table-controls-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 25px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.search-container label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #495057;
+    white-space: nowrap;
+}
+
+.search-input {
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 100%;
+    max-width: 250px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.sort-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sort-container label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #495057;
+    white-space: nowrap;
+}
+
+.sort-select {
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    min-width: 180px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.sort-select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.export-controls {
+    display: flex;
+    gap: 10px;
+}
+
+/* Table Header Refresh Button - Different from Filter Refresh */
+.table-controls-header .btn-refresh {
+    padding: 8px 16px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.table-controls-header .btn-refresh:hover {
+    background: #218838;
+    transform: translateY(-1px);
+}
+
+.table-controls-header .btn-refresh:active {
+    transform: translateY(0);
+}
+
+.btn-export {
+    padding: 8px 16px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-export:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
+}
+
+.btn-export:active {
+    transform: translateY(0);
+}
+
+/* Table Controls (inside table) */
+.table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.per-page-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.per-page-selector select {
+    padding: 4px 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 13px;
+    background: white;
+}
+
+.pagination-info {
+    font-weight: 500;
+}
+
+/* Data Table - Style seperti Akta */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.data-table th {
+    background: #f8f9fa;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.data-table th.number,
+.data-table th.percentage {
+    text-align: right;
+}
+
+.data-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f1f3f4;
+    color: #495057;
+}
+
+.data-table td.number {
+    text-align: right;
+    font-weight: 500;
+    font-family: "Courier New", monospace;
+}
+
+.data-table td.percentage {
+    text-align: right;
+    font-weight: 600;
+}
+
+.data-table td.percentage.high {
+    color: #27ae60;
+}
+
+.data-table td.percentage.medium {
+    color: #f39c12;
+}
+
+.data-table td.percentage.low {
+    color: #e74c3c;
+}
+
+.data-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+/* Pagination Controls - Style seperti Akta */
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    gap: 5px;
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+.pagination-btn {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    background: white;
+    color: #495057;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pagination-btn:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.pagination-btn.active {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+.pagination-btn.page-number {
+    min-width: 40px;
+    justify-content: center;
+}
+
+/* Focus states for accessibility */
+.search-input:focus,
+.sort-select:focus,
+.btn-export:focus,
+.table-controls-header .btn-refresh:focus,
+.pagination-btn:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+}
+
+/* Text center untuk no data message */
+.text-center {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+    font-style: italic;
 }
 
 /* Integration with existing demografi page styles */
@@ -354,14 +583,156 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Stat Cards - Border top instead of left, no icons */
 .demografi-page .border-left-primary {
-    border-left: 4px solid #3498db !important;
+    border-left: none !important;
+    border-top: 4px solid #3498db !important;
 }
 
 .demografi-page .border-left-success {
-    border-left: 4px solid #e91e63 !important;
+    border-left: none !important;
+    border-top: 4px solid #e91e63 !important;
 }
 
 .demografi-page .border-left-info {
-    border-left: 4px solid #17a2b8 !important;
+    border-left: none !important;
+    border-top: 4px solid #17a2b8 !important;
+}
+
+/* Hide icons in stat cards */
+.demografi-page .card .col-auto {
+    display: none !important;
+}
+
+.demografi-page .card .row.no-gutters .col.mr-2 {
+    margin-right: 0 !important;
+    width: 100%;
+}
+
+/* Mobile optimizations for demografi */
+@media (max-width: 768px) {
+    .demografi-page .chart-legend {
+        padding: 10px;
+    }
+    
+    .demografi-page .legend-item {
+        font-size: 11px;
+        padding: 3px 8px;
+    }
+
+    .filter-controls {
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px;
+    }
+    
+    .filter-group {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .filter-controls select {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .filter-controls .btn-refresh {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .filter-title {
+        text-align: center;
+    }
+
+    .table-controls-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    .search-container,
+    .sort-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .search-input,
+    .sort-select {
+        max-width: none;
+    }
+
+    .data-table {
+        font-size: 12px;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 8px 10px;
+    }
+
+    .pagination-controls {
+        flex-wrap: wrap;
+        gap: 3px;
+    }
+
+    .pagination-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .filter-controls {
+        padding: 16px;
+        margin: 15px 0;
+    }
+    
+    .filter-controls select {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+    
+    .filter-controls .btn-refresh {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+
+    .table-controls-header {
+        padding: 15px;
+    }
+
+    .data-table {
+        font-size: 11px;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 6px 8px;
+    }
+}
+
+/* Loading spinner animation */
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #4e73df;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Print styles */
+@media print {
+    .table-controls-header,
+    .table-controls,
+    .pagination-controls,
+    .filter-controls {
+        display: none;
+    }
+
+    .data-table {
+        font-size: 12px;
+    }
 }
