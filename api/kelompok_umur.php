@@ -3,392 +3,364 @@
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-// Include configuration and database connection
-require_once '../config/config.php';
+// Handle preflight requests
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(0);
+}
+
 require_once '../config/database.php';
 
+class KelompokUmurAPI {
+    private $conn;
+    
+    public function __construct($db) {
+        $this->conn = $db;
+    }
+    
+    public function handleRequest() {
+        $method = $_SERVER['REQUEST_METHOD'];
+        
+        try {
+            switch ($method) {
+                case 'GET':
+                    $this->getData();
+                    break;
+                default:
+                    $this->sendResponse(['error' => 'Method not allowed'], 405);
+                    break;
+            }
+        } catch (Exception $e) {
+            $this->sendResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    }
+    
+    private function getData() {
+        try {
+            // Get query parameters
+            $wilayah = isset($_GET['wilayah']) ? $_GET['wilayah'] : null;
+            $kelompok = isset($_GET['kelompok']) ? $_GET['kelompok'] : 'all';
+            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 25;
+            $search = isset($_GET['search']) ? $_GET['search'] : '';
+            $sort = isset($_GET['sort']) ? $_GET['sort'] : 'kode_asc';
+            
+            // Parse sort parameter
+            $sortParts = explode('_', $sort);
+            $sortField = $sortParts[0];
+            $sortDirection = isset($sortParts[1]) ? strtoupper($sortParts[1]) : 'ASC';
+            
+            // Validate sort direction
+            if (!in_array($sortDirection, ['ASC', 'DESC'])) {
+                $sortDirection = 'ASC';
+            }
+            
+            // Build base query for kelompok_umur table
+            $baseQuery = "
+                SELECT 
+                    ku.kode_wilayah,
+                    ku.wilayah,
+                    ku.umur_00_04,
+                    ku.umur_05_09,
+                    ku.umur_10_14,
+                    ku.umur_15_19,
+                    ku.umur_20_24,
+                    ku.umur_25_29,
+                    ku.umur_30_34,
+                    ku.umur_35_39,
+                    ku.umur_40_44,
+                    ku.umur_45_49,
+                    ku.umur_50_54,
+                    ku.umur_55_59,
+                    ku.umur_60_64,
+                    ku.umur_65_69,
+                    ku.umur_70_74,
+                    ku.umur_75_plus,
+                    ku.total,
+                    -- Calculate age group totals
+                    ku.umur_00_04 as balita,
+                    (ku.umur_05_09 + ku.umur_10_14) as anak,
+                    (ku.umur_15_19 + ku.umur_20_24 + ku.umur_25_29 + ku.umur_30_34 + ku.umur_35_39 + ku.umur_40_44 + ku.umur_45_49 + ku.umur_50_54 + ku.umur_55_59) as dewasa,
+                    (ku.umur_60_64 + ku.umur_65_69 + ku.umur_70_74 + ku.umur_75_plus) as lansia
+                FROM kelompok_umur ku
+                WHERE 1=1
+            ";
+            
+            $params = [];
+            $whereConditions = [];
+            
+            // Add search condition
+            if (!empty($search)) {
+                $whereConditions[] = "(ku.wilayah LIKE ? OR ku.kode_wilayah LIKE ?)";
+                $searchParam = '%' . $search . '%';
+                $params[] = $searchParam;
+                $params[] = $searchParam;
+            }
+            
+            // Add wilayah filter if specified
+            if ($wilayah) {
+                $whereConditions[] = "ku.kode_wilayah = ?";
+                $params[] = $wilayah;
+            }
+            
+            // Add where conditions to query
+            if (!empty($whereConditions)) {
+                $baseQuery .= " AND " . implode(" AND ", $whereConditions);
+            }
+            
+            // Add sorting
+            $orderByClause = $this->buildOrderByClause($sortField, $sortDirection);
+            $baseQuery .= " " . $orderByClause;
+            
+            // Get total count for pagination
+            $countQuery = "SELECT COUNT(*) as total FROM (" . $baseQuery . ") as counted";
+            $countStmt = $this->conn->prepare($countQuery);
+            if (!empty($params)) {
+                $countStmt->execute($params);
+            } else {
+                $countStmt->execute();
+            }
+            $totalRecords = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+            
+            // Add pagination
+            $offset = ($page - 1) * $limit;
+            $baseQuery .= " LIMIT ? OFFSET ?";
+            $params[] = $limit;
+            $params[] = $offset;
+            
+            // Execute main query
+            $stmt = $this->conn->prepare($baseQuery);
+            $stmt->execute($params);
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Get overall statistics
+            $statsQuery = "
+                SELECT 
+                    SUM(umur_00_04) as total_balita,
+                    SUM(umur_05_09 + umur_10_14) as total_anak,
+                    SUM(umur_15_19 + umur_20_24 + umur_25_29 + umur_30_34 + umur_35_39 + umur_40_44 + umur_45_49 + umur_50_54 + umur_55_59) as total_dewasa,
+                    SUM(umur_60_64 + umur_65_69 + umur_70_74 + umur_75_plus) as total_lansia,
+                    SUM(total) as total_keseluruhan,
+                    COUNT(*) as total_wilayah
+                FROM kelompok_umur
+                WHERE kode_wilayah != '11.00'
+            ";
+            
+            $statsStmt = $this->conn->prepare($statsQuery);
+            $statsStmt->execute();
+            $stats = $statsStmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Get detailed age group breakdown
+            $detailQuery = "
+                SELECT 
+                    SUM(umur_00_04) as umur_0_4,
+                    SUM(umur_05_09) as umur_5_9,
+                    SUM(umur_10_14) as umur_10_14,
+                    SUM(umur_15_19) as umur_15_19,
+                    SUM(umur_20_24) as umur_20_24,
+                    SUM(umur_25_29) as umur_25_29,
+                    SUM(umur_30_34) as umur_30_34,
+                    SUM(umur_35_39) as umur_35_39,
+                    SUM(umur_40_44) as umur_40_44,
+                    SUM(umur_45_49) as umur_45_49,
+                    SUM(umur_50_54) as umur_50_54,
+                    SUM(umur_55_59) as umur_55_59,
+                    SUM(umur_60_64) as umur_60_64,
+                    SUM(umur_65_69) as umur_65_69,
+                    SUM(umur_70_74) as umur_70_74,
+                    SUM(umur_75_plus) as umur_75_plus
+                FROM kelompok_umur
+                WHERE kode_wilayah != '11.00'
+            ";
+            
+            $detailStmt = $this->conn->prepare($detailQuery);
+            $detailStmt->execute();
+            $detailStats = $detailStmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Calculate percentages
+            $totalPopulation = $stats['total_keseluruhan'];
+            
+            // Format response data
+            $formattedData = array_map(function($row) use ($totalPopulation) {
+                return [
+                    'kode_wilayah' => $row['kode_wilayah'],
+                    'wilayah' => $row['wilayah'],
+                    'umur_00_04' => (int)$row['umur_00_04'],
+                    'umur_05_09' => (int)$row['umur_05_09'],
+                    'umur_10_14' => (int)$row['umur_10_14'],
+                    'umur_15_19' => (int)$row['umur_15_19'],
+                    'umur_20_24' => (int)$row['umur_20_24'],
+                    'umur_25_29' => (int)$row['umur_25_29'],
+                    'umur_30_34' => (int)$row['umur_30_34'],
+                    'umur_35_39' => (int)$row['umur_35_39'],
+                    'umur_40_44' => (int)$row['umur_40_44'],
+                    'umur_45_49' => (int)$row['umur_45_49'],
+                    'umur_50_54' => (int)$row['umur_50_54'],
+                    'umur_55_59' => (int)$row['umur_55_59'],
+                    'umur_60_64' => (int)$row['umur_60_64'],
+                    'umur_65_69' => (int)$row['umur_65_69'],
+                    'umur_70_74' => (int)$row['umur_70_74'],
+                    'umur_75_plus' => (int)$row['umur_75_plus'],
+                    'balita' => (int)$row['balita'],
+                    'anak' => (int)$row['anak'],
+                    'dewasa' => (int)$row['dewasa'],
+                    'lansia' => (int)$row['lansia'],
+                    'total' => (int)$row['total'],
+                    'persentase_balita' => $row['total'] > 0 ? round(($row['balita'] / $row['total']) * 100, 2) : 0,
+                    'persentase_anak' => $row['total'] > 0 ? round(($row['anak'] / $row['total']) * 100, 2) : 0,
+                    'persentase_dewasa' => $row['total'] > 0 ? round(($row['dewasa'] / $row['total']) * 100, 2) : 0,
+                    'persentase_lansia' => $row['total'] > 0 ? round(($row['lansia'] / $row['total']) * 100, 2) : 0
+                ];
+            }, $data);
+            
+            // Prepare response
+            $response = [
+                'success' => true,
+                'data' => $formattedData,
+                'pagination' => [
+                    'current_page' => $page,
+                    'per_page' => $limit,
+                    'total_records' => (int)$totalRecords,
+                    'total_pages' => ceil($totalRecords / $limit)
+                ],
+                'statistics' => [
+                    'total_balita' => (int)$stats['total_balita'],
+                    'total_anak' => (int)$stats['total_anak'],
+                    'total_dewasa' => (int)$stats['total_dewasa'],
+                    'total_lansia' => (int)$stats['total_lansia'],
+                    'total_keseluruhan' => (int)$stats['total_keseluruhan'],
+                    'total_wilayah' => (int)$stats['total_wilayah'],
+                    'persentase_balita' => $totalPopulation > 0 ? round(($stats['total_balita'] / $totalPopulation) * 100, 2) : 0,
+                    'persentase_anak' => $totalPopulation > 0 ? round(($stats['total_anak'] / $totalPopulation) * 100, 2) : 0,
+                    'persentase_dewasa' => $totalPopulation > 0 ? round(($stats['total_dewasa'] / $totalPopulation) * 100, 2) : 0,
+                    'persentase_lansia' => $totalPopulation > 0 ? round(($stats['total_lansia'] / $totalPopulation) * 100, 2) : 0
+                ],
+                'detail_breakdown' => [
+                    'umur_0_4' => [
+                        'jumlah' => (int)$detailStats['umur_0_4'],
+                        'persentase' => $totalPopulation > 0 ? round(($detailStats['umur_0_4'] / $totalPopulation) * 100, 2) : 0
+                    ],
+                    'umur_5_9' => [
+                        'jumlah' => (int)$detailStats['umur_5_9'],
+                        'persentase' => $totalPopulation > 0 ? round(($detailStats['umur_5_9'] / $totalPopulation) * 100, 2) : 0
+                    ],
+                    'umur_10_14' => [
+                        'jumlah' => (int)$detailStats['umur_10_14'],
+                        'persentase' => $totalPopulation > 0 ? round(($detailStats['umur_10_14'] / $totalPopulation) * 100, 2) : 0
+                    ],
+                    'umur_15_19' => [
+                        'jumlah' => (int)$detailStats['umur_15_19'],
+                        'persentase' => $totalPopulation > 0 ? round(($detailStats['umur_15_19'] / $totalPopulation) * 100, 2) : 0
+                    ],
+                    'umur_20_24' => [
+                        'jumlah' => (int)$detailStats['umur_20_24'],
+                        'persentase' => $totalPopulation > 0 ? round(($detailStats['umur_20_24'] / $totalPopulation) * 100, 2) : 0
+                    ],
+                    'umur_25_29' => [
+                        'jumlah' => (int)$detailStats['umur_25_29'],
+                        'persentase' => $totalPopulation > 0 ? round(($detailStats['umur_25_29'] / $totalPopulation) * 100, 2) : 0
+                    ],
+                    'umur_30_34' => [
+                        'jumlah' => (int)$detailStats['umur_30_34'],
+                        'persentase' => $totalPopulation > 0 ? round(($detailStats['umur_30_34'] / $totalPopulation) * 100, 2) : 0
+                    ],
+                    'umur_35_39' => [
+                        'jumlah' => (int)$detailStats['umur_35_39'],
+                        'persentase' => $totalPopulation > 0 ? round(($detailStats['umur_35_39'] / $totalPopulation) * 100, 2) : 0
+                    ],
+                    'umur_40_44' => [
+                        'jumlah' => (int)$detailStats['umur_40_44'],
+                        'persentase' => $totalPopulation > 0 ? round(($detailStats['umur_40_44'] / $totalPopulation) * 100, 2) : 0
+                    ],
+                    'umur_45_49' => [
+                        'jumlah' => (int)$detailStats['umur_45_49'],
+                        'persentase' => $totalPopulation > 0 ? round(($detailStats['umur_45_49'] / $totalPopulation) * 100, 2) : 0
+                    ],
+                    'umur_50_54' => [
+                        'jumlah' => (int)$detailStats['umur_50_54'],
+                        'persentase' => $totalPopulation > 0 ? round(($detailStats['umur_50_54'] / $totalPopulation) * 100, 2) : 0
+                    ],
+                    'umur_55_59' => [
+                        'jumlah' => (int)$detailStats['umur_55_59'],
+                        'persentase' => $totalPopulation > 0 ? round(($detailStats['umur_55_59'] / $totalPopulation) * 100, 2) : 0
+                    ],
+                    'umur_60_64' => [
+                        'jumlah' => (int)$detailStats['umur_60_64'],
+                        'persentase' => $totalPopulation > 0 ? round(($detailStats['umur_60_64'] / $totalPopulation) * 100, 2) : 0
+                    ],
+                    'umur_65_69' => [
+                        'jumlah' => (int)$detailStats['umur_65_69'],
+                        'persentase' => $totalPopulation > 0 ? round(($detailStats['umur_65_69'] / $totalPopulation) * 100, 2) : 0
+                    ],
+                    'umur_70_74' => [
+                        'jumlah' => (int)$detailStats['umur_70_74'],
+                        'persentase' => $totalPopulation > 0 ? round(($detailStats['umur_70_74'] / $totalPopulation) * 100, 2) : 0
+                    ],
+                    'umur_75_plus' => [
+                        'jumlah' => (int)$detailStats['umur_75_plus'],
+                        'persentase' => $totalPopulation > 0 ? round(($detailStats['umur_75_plus'] / $totalPopulation) * 100, 2) : 0
+                    ]
+                ],
+                'filters' => [
+                    'search' => $search,
+                    'sort' => $sort,
+                    'wilayah' => $wilayah,
+                    'kelompok' => $kelompok
+                ]
+            ];
+            
+            $this->sendResponse($response);
+            
+        } catch (Exception $e) {
+            $this->sendResponse(['error' => 'Database error: ' . $e->getMessage()], 500);
+        }
+    }
+    
+    private function buildOrderByClause($sortField, $sortDirection) {
+        $allowedSortFields = [
+            'kode' => 'ku.kode_wilayah',
+            'wilayah' => 'ku.wilayah',
+            'total' => 'ku.total',
+            'balita' => 'balita',
+            'anak' => 'anak',
+            'dewasa' => 'dewasa',
+            'lansia' => 'lansia',
+            'persentase' => 'ku.total'
+        ];
+        
+        if (array_key_exists($sortField, $allowedSortFields)) {
+            return "ORDER BY " . $allowedSortFields[$sortField] . " " . $sortDirection;
+        }
+        
+        // Default sort
+        return "ORDER BY ku.kode_wilayah ASC";
+    }
+    
+    private function sendResponse($data, $statusCode = 200) {
+        http_response_code($statusCode);
+        echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+}
+
+// Initialize database connection
 try {
     $database = new Database();
     $db = $database->getConnection();
     
-    // Get action parameter
-    $action = isset($_GET['action']) ? $_GET['action'] : 'get_all';
-    
-    switch ($action) {
-        case 'get_all':
-            handleGetAll($db);
-            break;
-            
-        case 'get_stats':
-            handleGetStats($db);
-            break;
-            
-        case 'get_by_filter':
-            handleGetByFilter($db);
-            break;
-            
-        case 'test_connection':
-            handleTestConnection($database);
-            break;
-            
-        default:
-            http_response_code(400);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Invalid action parameter',
-                'data' => []
-            ]);
+    if ($db === null) {
+        throw new Exception('Database connection failed');
     }
     
-} catch(PDOException $e) {
+    $api = new KelompokUmurAPI($db);
+    $api->handleRequest();
+    
+} catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
-        'success' => false,
-        'message' => 'Database error: ' . $e->getMessage(),
-        'data' => [],
-        'debug' => isDevelopment() ? [
-            'file' => __FILE__,
-            'line' => __LINE__,
-            'trace' => $e->getTraceAsString()
-        ] : null
-    ]);
-} catch(Exception $e) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Server error: ' . $e->getMessage(),
-        'data' => [],
-        'debug' => isDevelopment() ? [
-            'file' => __FILE__,
-            'line' => __LINE__
-        ] : null
-    ]);
-}
-
-function handleTestConnection($database) {
-    $result = $database->testConnection();
-    echo json_encode($result);
-}
-
-// Function to get all data
-function handleGetAll($db) {
-    try {
-        $table_check = "SHOW TABLES LIKE 'kel_umur_202401'";
-        $check_stmt = $db->prepare($table_check);
-        $check_stmt->execute();
-        
-        if ($check_stmt->rowCount() == 0) {
-            throw new Exception("Table 'kel_umur_202401' tidak ditemukan. Pastikan database sudah diimport dengan benar.");
-        }
-
-        $query = "SELECT 
-                    KODE,
-                    WILAYAH,
-                    `00-04` as `00_04`,
-                    `05-09` as `05_09`, 
-                    `10-14` as `10_14`,
-                    `15-19` as `15_19`,
-                    `20-24` as `20_24`,
-                    `25-29` as `25_29`,
-                    `30-34` as `30_34`,
-                    `35-39` as `35_39`,
-                    `40-44` as `40_44`,
-                    `45-49` as `45_49`,
-                    `50-54` as `50_54`,
-                    `55-59` as `55_59`,
-                    `60-64` as `60_64`,
-                    `65-69` as `65_69`,
-                    `70-74` as `70_74`,
-                    `>75` as `>75`
-                  FROM kel_umur_202401 
-                  ORDER BY WILAYAH";
-                  
-        $stmt = $db->prepare($query);
-        $stmt->execute();
-        
-        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        // Convert string numbers to integers
-        foreach ($data as &$row) {
-            foreach ($row as $key => &$value) {
-                if ($key !== 'KODE' && $key !== 'WILAYAH') {
-                    $value = intval($value);
-                }
-            }
-        }
-        
-        echo json_encode([
-            'success' => true,
-            'data' => $data,
-            'total_records' => count($data),
-            'message' => 'Data kelompok umur berhasil diambil'
-        ]);
-        
-    } catch(Exception $e) {
-        throw new Exception("Error getting data: " . $e->getMessage());
-    }
-}
-
-
-// Function to get statistics
-function handleGetStats($db) {
-    try {
-        $table_check = "SHOW TABLES LIKE 'kel_umur_202401'";
-        $check_stmt = $db->prepare($table_check);
-        $check_stmt->execute();
-        
-        if ($check_stmt->rowCount() == 0) {
-            throw new Exception("Table 'kel_umur_202401' tidak ditemukan.");
-        }
-
-        // Query to get statistics by age groups
-        $query = "SELECT 
-                    SUM(`00-04`) as total_balita,
-                    SUM(`05-09` + `10-14`) as total_anak,
-                    SUM(`15-19` + `20-24` + `25-29` + `30-34` + `35-39` + `40-44` + `45-49` + `50-54` + `55-59`) as total_dewasa,
-                    SUM(`60-64` + `65-69` + `70-74` + `>75`) as total_lansia,
-                    SUM(`00-04` + `05-09` + `10-14` + `15-19` + `20-24` + `25-29` + `30-34` + `35-39` + `40-44` + `45-49` + `50-54` + `55-59` + `60-64` + `65-69` + `70-74` + `>75`) as total_keseluruhan,
-                    COUNT(*) as total_wilayah
-                  FROM kel_umur_202401";
-                  
-        $stmt = $db->prepare($query);
-        $stmt->execute();
-        
-        $overall_stats = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        // Query to get detailed age group stats
-        $detail_query = "SELECT 
-                           SUM(`00-04`) as `00_04`,
-                           SUM(`05-09`) as `05_09`,
-                           SUM(`10-14`) as `10_14`,
-                           SUM(`15-19`) as `15_19`,
-                           SUM(`20-24`) as `20_24`,
-                           SUM(`25-29`) as `25_29`,
-                           SUM(`30-34`) as `30_34`,
-                           SUM(`35-39`) as `35_39`,
-                           SUM(`40-44`) as `40_44`,
-                           SUM(`45-49`) as `45_49`,
-                           SUM(`50-54`) as `50_54`,
-                           SUM(`55-59`) as `55_59`,
-                           SUM(`60-64`) as `60_64`,
-                           SUM(`65-69`) as `65_69`,
-                           SUM(`70-74`) as `70_74`,
-                           SUM(`>75`) as `>75`
-                         FROM kel_umur_202401";
-                         
-        $detail_stmt = $db->prepare($detail_query);
-        $detail_stmt->execute();
-        
-        $detail_stats = $detail_stmt->fetch(PDO::FETCH_ASSOC);
-        
-        // Query to get top wilayah by categories
-        $top_balita_query = "SELECT WILAYAH, `00-04` as total 
-                             FROM kel_umur_202401 
-                             ORDER BY `00-04` DESC LIMIT 1";
-        
-        $top_anak_query = "SELECT WILAYAH, (`05-09` + `10-14`) as total 
-                           FROM kel_umur_202401 
-                           ORDER BY (`05-09` + `10-14`) DESC LIMIT 1";
-        
-        $top_dewasa_query = "SELECT WILAYAH, 
-                             (`15-19` + `20-24` + `25-29` + `30-34` + `35-39` + `40-44` + `45-49` + `50-54` + `55-59`) as total 
-                             FROM kel_umur_202401 
-                             ORDER BY (`15-19` + `20-24` + `25-29` + `30-34` + `35-39` + `40-44` + `45-49` + `50-54` + `55-59`) DESC LIMIT 1";
-        
-        $top_lansia_query = "SELECT WILAYAH, (`60-64` + `65-69` + `70-74` + `>75`) as total 
-                             FROM kel_umur_202401 
-                             ORDER BY (`60-64` + `65-69` + `70-74` + `>75`) DESC LIMIT 1";
-        
-        // Execute top queries
-        $top_balita = $db->query($top_balita_query)->fetch(PDO::FETCH_ASSOC);
-        $top_anak = $db->query($top_anak_query)->fetch(PDO::FETCH_ASSOC);
-        $top_dewasa = $db->query($top_dewasa_query)->fetch(PDO::FETCH_ASSOC);
-        $top_lansia = $db->query($top_lansia_query)->fetch(PDO::FETCH_ASSOC);
-        
-        // Convert string numbers to integers
-        foreach ($overall_stats as $key => &$value) {
-            $value = intval($value);
-        }
-        
-        foreach ($detail_stats as $key => &$value) {
-            $value = intval($value);
-        }
-        
-        // Format top wilayah data
-        $top_wilayah = [
-            'balita' => [
-                'wilayah' => $top_balita['WILAYAH'],
-                'count' => intval($top_balita['total'])
-            ],
-            'anak' => [
-                'wilayah' => $top_anak['WILAYAH'],
-                'count' => intval($top_anak['total'])
-            ],
-            'dewasa' => [
-                'wilayah' => $top_dewasa['WILAYAH'],
-                'count' => intval($top_dewasa['total'])
-            ],
-            'lansia' => [
-                'wilayah' => $top_lansia['WILAYAH'],
-                'count' => intval($top_lansia['total'])
-            ]
-        ];
-        
-        echo json_encode([
-            'success' => true,
-            'data' => [
-                'overall' => $overall_stats,
-                'detail' => $detail_stats,
-                'top_wilayah' => $top_wilayah
-            ],
-            'message' => 'Statistik kelompok umur berhasil diambil'
-        ]);
-        
-    } catch(Exception $e) {
-        throw new Exception("Error getting statistics: " . $e->getMessage());
-    }
-}
-
-// Function to get filtered data
-function handleGetByFilter($db) {
-    try {
-        // Get filters from request
-        $wilayah = isset($_GET['wilayah']) ? $_GET['wilayah'] : '';
-        $sort_by = isset($_GET['sort_by']) ? $_GET['sort_by'] : 'WILAYAH';
-        $sort_order = isset($_GET['sort_order']) ? $_GET['sort_order'] : 'ASC';
-        $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 0;
-        
-        // Build base query
-        $query = "SELECT 
-                    KODE,
-                    WILAYAH,
-                    `00-04` as `00_04`,
-                    `05-09` as `05_09`, 
-                    `10-14` as `10_14`,
-                    `15-19` as `15_19`,
-                    `20-24` as `20_24`,
-                    `25-29` as `25_29`,
-                    `30-34` as `30_34`,
-                    `35-39` as `35_39`,
-                    `40-44` as `40_44`,
-                    `45-49` as `45_49`,
-                    `50-54` as `50_54`,
-                    `55-59` as `55_59`,
-                    `60-64` as `60_64`,
-                    `65-69` as `65_69`,
-                    `70-74` as `70_74`,
-                    `>75` as `>75`,
-                    (`00-04` + `05-09` + `10-14` + `15-19` + `20-24` + `25-29` + `30-34` + `35-39` + `40-44` + `45-49` + `50-54` + `55-59` + `60-64` + `65-69` + `70-74` + `>75`) as total_population
-                  FROM kel_umur_202401";
-        
-        $conditions = [];
-        $params = [];
-        
-        // Add wilayah filter if specified
-        if (!empty($wilayah)) {
-            $conditions[] = "WILAYAH LIKE ?";
-            $params[] = "%$wilayah%";
-        }
-        
-        // Add WHERE clause if there are conditions
-        if (!empty($conditions)) {
-            $query .= " WHERE " . implode(" AND ", $conditions);
-        }
-        
-        // Add ORDER BY clause
-        $allowed_sort_columns = [
-            'WILAYAH', 'KODE', '00_04', '05_09', '10_14', '15_19', '20_24',
-            '25_29', '30_34', '35_39', '40_44', '45_49', '50_54', '55_59',
-            '60_64', '65_69', '70_74', '>75', 'total_population'
-        ];
-        
-        if (in_array($sort_by, $allowed_sort_columns)) {
-            $sort_order = strtoupper($sort_order) === 'DESC' ? 'DESC' : 'ASC';
-            
-            // Handle special case for >75 column
-            if ($sort_by === '>75') {
-                $query .= " ORDER BY `>75` $sort_order";
-            } else if ($sort_by === 'total_population') {
-                $query .= " ORDER BY total_population $sort_order";
-            } else {
-                $query .= " ORDER BY `$sort_by` $sort_order";
-            }
-        } else {
-            $query .= " ORDER BY WILAYAH ASC";
-        }
-        
-        // Add LIMIT clause if specified
-        if ($limit > 0) {
-            $query .= " LIMIT $limit";
-        }
-        
-        $stmt = $db->prepare($query);
-        $stmt->execute($params);
-        
-        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        // Convert string numbers to integers and calculate additional fields
-        foreach ($data as &$row) {
-            // Convert numeric fields
-            foreach ($row as $key => &$value) {
-                if ($key !== 'KODE' && $key !== 'WILAYAH') {
-                    $value = intval($value);
-                }
-            }
-            
-            // Calculate category totals
-            $row['balita'] = $row['00_04'];
-            $row['anak'] = $row['05_09'] + $row['10_14'];
-            $row['remaja'] = $row['15_19'] + $row['20_24'];
-            $row['dewasa'] = $row['25_29'] + $row['30_34'] + $row['35_39'] + 
-                            $row['40_44'] + $row['45_49'] + $row['50_54'] + $row['55_59'];
-            $row['lansia'] = $row['60_64'] + $row['65_69'] + $row['70_74'] + $row['>75'];
-            
-            // Calculate percentages
-            if ($row['total_population'] > 0) {
-                $row['balita_pct'] = round(($row['balita'] / $row['total_population']) * 100, 2);
-                $row['anak_pct'] = round(($row['anak'] / $row['total_population']) * 100, 2);
-                $row['remaja_pct'] = round(($row['remaja'] / $row['total_population']) * 100, 2);
-                $row['dewasa_pct'] = round(($row['dewasa'] / $row['total_population']) * 100, 2);
-                $row['lansia_pct'] = round(($row['lansia'] / $row['total_population']) * 100, 2);
-            } else {
-                $row['balita_pct'] = 0;
-                $row['anak_pct'] = 0;
-                $row['remaja_pct'] = 0;
-                $row['dewasa_pct'] = 0;
-                $row['lansia_pct'] = 0;
-            }
-        }
-        
-        // Get total count for pagination
-        $count_query = "SELECT COUNT(*) as total FROM kel_umur_202401";
-        if (!empty($conditions)) {
-            $count_query .= " WHERE " . implode(" AND ", $conditions);
-        }
-        
-        $count_stmt = $db->prepare($count_query);
-        $count_stmt->execute($params);
-        $total_count = $count_stmt->fetch(PDO::FETCH_ASSOC)['total'];
-        
-        echo json_encode([
-            'success' => true,
-            'data' => $data,
-            'total_records' => intval($total_count),
-            'filtered_records' => count($data),
-            'filters' => [
-                'wilayah' => $wilayah,
-                'sort_by' => $sort_by,
-                'sort_order' => $sort_order,
-                'limit' => $limit
-            ],
-            'message' => 'Data kelompok umur berhasil difilter'
-        ]);
-        
-    } catch(Exception $e) {
-        throw new Exception("Error filtering data: " . $e->getMessage());
-    }
+        'error' => 'Server error: ' . $e->getMessage()
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 }
 ?>
