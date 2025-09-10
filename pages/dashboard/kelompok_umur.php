@@ -217,6 +217,7 @@
 
     <!-- Scripts -->
     <script>window.API_BASE_URL = '../../api/';</script>
+    <script src="../../assets/js/utils.js"></script>
     <script src="../../assets/js/main.js"></script>
     <script src="../../assets/js/api.js"></script>
     <script src="../../assets/js/dashboard/common.js"></script>
