@@ -21,7 +21,7 @@
         <!-- Page Header -->
         <div class="page-header">
             <h1>Data Kelompok Umur</h1>
-            <p>Distribusi penduduk berdasarkan kelompok umur di berbagai wilayah</p>
+            <p>Distribusi penduduk berdasarkan kelompok umur dan wilayah</p>
         </div>
 
         <!-- Overall Stats Cards -->
@@ -61,153 +61,332 @@
         <!-- Kelompok Umur Tabs -->
         <div class="kelompok-umur-tabs">
             <div class="tab-buttons">
-                <button class="tab-button active" data-tab="kelompok_detail">
-                    <i class="fas fa-users"></i>
-                    Detail Kelompok Umur
+                <button class="tab-button active" data-tab="overview">
+                    <i class="fas fa-chart-pie"></i>
+                    Overview
                 </button>
-                <button class="tab-button" data-tab="distribusi_wilayah">
-                    <i class="fas fa-map-marker-alt"></i>
-                    Distribusi Wilayah
+                <button class="tab-button" data-tab="balita">
+                    <i class="fas fa-baby"></i>
+                    Balita (0-4)
+                </button>
+                <button class="tab-button" data-tab="anak">
+                    <i class="fas fa-child"></i>
+                    Anak (5-14)
+                </button>
+                <button class="tab-button" data-tab="dewasa">
+                    <i class="fas fa-user"></i>
+                    Dewasa (15-59)
+                </button>
+                <button class="tab-button" data-tab="lansia">
+                    <i class="fas fa-walking-cane"></i>
+                    Lansia (60+)
                 </button>
             </div>
 
-            <!-- Detail Kelompok Umur Tab Content -->
-            <div id="kelompok_detail-content" class="tab-content active">
-                <!-- Stats for this tab -->
-                <div class="stats-grid" id="kelompok_detail-stats">
-                    <!-- Stats will be populated by JavaScript -->
+            <!-- Overview Tab Content -->
+            <div id="overview-content" class="tab-content active">
+                <!-- Detail Kelompok Umur Stats -->
+                <div class="detail-stats-grid">
+                    <div class="detail-stat-card">
+                        <h4>0-4 Tahun</h4>
+                        <div class="stat-value">25,837</div>
+                        <div class="stat-percentage">5.4%</div>
+                    </div>
+                    <div class="detail-stat-card">
+                        <h4>5-9 Tahun</h4>
+                        <div class="stat-value">34,349</div>
+                        <div class="stat-percentage">7.2%</div>
+                    </div>
+                    <div class="detail-stat-card">
+                        <h4>10-14 Tahun</h4>
+                        <div class="stat-value">35,853</div>
+                        <div class="stat-percentage">7.5%</div>
+                    </div>
+                    <div class="detail-stat-card">
+                        <h4>15-19 Tahun</h4>
+                        <div class="stat-value">32,412</div>
+                        <div class="stat-percentage">6.8%</div>
+                    </div>
                 </div>
 
-                <!-- Charts Container -->
-                <div class="kelompok-chart-container">
+                <!-- Overview Charts -->
+                <div class="overview-chart-container">
                     <div class="comparison-chart">
-                        <h3>Distribusi Kelompok Umur per Wilayah</h3>
+                        <h3>Distribusi Kelompok Umur</h3>
                         <div class="chart-container">
-                            <canvas id="kelompok_detail-bar-chart"></canvas>
+                            <canvas id="overview-pie-chart"></canvas>
                         </div>
                     </div>
                     <div class="comparison-chart">
-                        <h3>Proporsi Kelompok Umur Keseluruhan</h3>
+                        <h3>Perbandingan Kelompok Umur per Wilayah</h3>
                         <div class="chart-container">
-                            <canvas id="kelompok_detail-pie-chart"></canvas>
+                            <canvas id="overview-bar-chart"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <!-- Age Group Distribution Chart -->
-                <div class="age-distribution-container">
-                    <div class="age-chart-full">
-                        <h3>Piramida Penduduk Berdasarkan Kelompok Umur</h3>
-                        <div class="chart-container">
-                            <canvas id="kelompok_detail-pyramid-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Data Table -->
+                <!-- Overview Table -->
                 <div class="data-table-container">
                     <div class="table-controls-header">
                         <div class="search-container">
-                            <label for="kelompok_detail-search">Cari:</label>
-                            <input type="text" id="kelompok_detail-search" placeholder="Cari wilayah..." class="search-input">
+                            <label for="overview-search">Cari:</label>
+                            <input type="text" id="overview-search" placeholder="Cari wilayah..." class="search-input">
                         </div>
                         <div class="sort-container">
-                            <label for="kelompok_detail-sort">Urutkan:</label>
-                            <select id="kelompok_detail-sort" class="sort-select">
+                            <label for="overview-sort">Urutkan:</label>
+                            <select id="overview-sort" class="sort-select">
+                                <option value="kode_asc">Kode Wilayah A-Z</option>
+                                <option value="kode_desc">Kode Wilayah Z-A</option>
                                 <option value="wilayah_asc">Wilayah A-Z</option>
                                 <option value="wilayah_desc">Wilayah Z-A</option>
-                                <option value="00_04_desc">0-4 Tahun Tertinggi</option>
-                                <option value="00_04_asc">0-4 Tahun Terendah</option>
-                                <option value="05_09_desc">5-9 Tahun Tertinggi</option>
-                                <option value="05_09_asc">5-9 Tahun Terendah</option>
-                                <option value="10_14_desc">10-14 Tahun Tertinggi</option>
-                                <option value="10_14_asc">10-14 Tahun Terendah</option>
-                                <option value="15_19_desc">15-19 Tahun Tertinggi</option>
-                                <option value="15_19_asc">15-19 Tahun Terendah</option>
                                 <option value="total_desc">Total Tertinggi</option>
                                 <option value="total_asc">Total Terendah</option>
+                                <option value="balita_desc">Balita Tertinggi</option>
+                                <option value="anak_desc">Anak Tertinggi</option>
+                                <option value="dewasa_desc">Dewasa Tertinggi</option>
+                                <option value="lansia_desc">Lansia Tertinggi</option>
                             </select>
                         </div>
                         <div class="export-controls">
+                            <button class="btn-refresh" id="overview-refresh">
+                                <i class="fas fa-sync-alt"></i>
+                                Refresh
+                            </button>
                             <button class="btn-export" onclick="window.kelompokUmurDashboard?.exportData()">
                                 <i class="fas fa-download"></i>
                                 Export CSV
                             </button>
                         </div>
                     </div>
-                    <div id="kelompok_detail-table">
+                    <div id="overview-table">
                         <!-- Table will be populated by JavaScript -->
                     </div>
                 </div>
             </div>
 
-            <!-- Distribusi Wilayah Tab Content -->
-            <div id="distribusi_wilayah-content" class="tab-content">
-                <!-- Stats for this tab -->
-                <div class="stats-grid" id="distribusi_wilayah-stats">
+            <!-- Balita Tab Content -->
+            <div id="balita-content" class="tab-content">
+                <div class="stats-grid" id="balita-stats">
                     <!-- Stats will be populated by JavaScript -->
                 </div>
 
-                <!-- Regional Distribution Charts -->
                 <div class="kelompok-chart-container">
                     <div class="comparison-chart">
-                        <h3>Perbandingan Kelompok Umur Antar Wilayah</h3>
+                        <h3>Distribusi Balita (0-4) per Wilayah</h3>
                         <div class="chart-container">
-                            <canvas id="distribusi_wilayah-comparison-chart"></canvas>
+                            <canvas id="balita-bar-chart"></canvas>
                         </div>
                     </div>
                     <div class="comparison-chart">
-                        <h3>Distribusi Berdasarkan Kategori Umur</h3>
+                        <h3>Proporsi Balita per Wilayah</h3>
                         <div class="chart-container">
-                            <canvas id="distribusi_wilayah-category-chart"></canvas>
+                            <canvas id="balita-pie-chart"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <!-- Heatmap Style Distribution -->
-                <div class="heatmap-container">
-                    <div class="heatmap-chart">
-                        <h3>Peta Sebaran Kelompok Umur</h3>
-                        <div class="chart-container">
-                            <canvas id="distribusi_wilayah-heatmap-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Data Table -->
                 <div class="data-table-container">
                     <div class="table-controls-header">
                         <div class="search-container">
-                            <label for="distribusi_wilayah-search">Cari:</label>
-                            <input type="text" id="distribusi_wilayah-search" placeholder="Cari wilayah..." class="search-input">
+                            <label for="balita-search">Cari:</label>
+                            <input type="text" id="balita-search" placeholder="Cari wilayah..." class="search-input">
                         </div>
                         <div class="sort-container">
-                            <label for="distribusi_wilayah-sort">Urutkan:</label>
-                            <select id="distribusi_wilayah-sort" class="sort-select">
+                            <label for="balita-sort">Urutkan:</label>
+                            <select id="balita-sort" class="sort-select">
+                                <option value="kode_asc">Kode Wilayah A-Z</option>
+                                <option value="kode_desc">Kode Wilayah Z-A</option>
                                 <option value="wilayah_asc">Wilayah A-Z</option>
                                 <option value="wilayah_desc">Wilayah Z-A</option>
-                                <option value="balita_desc">Balita (0-4) Tertinggi</option>
-                                <option value="balita_asc">Balita (0-4) Terendah</option>
-                                <option value="anak_desc">Anak (5-14) Tertinggi</option>
-                                <option value="anak_asc">Anak (5-14) Terendah</option>
-                                <option value="remaja_desc">Remaja (15-24) Tertinggi</option>
-                                <option value="remaja_asc">Remaja (15-24) Terendah</option>
-                                <option value="dewasa_desc">Dewasa (25-59) Tertinggi</option>
-                                <option value="dewasa_asc">Dewasa (25-59) Terendah</option>
-                                <option value="lansia_desc">Lansia (60+) Tertinggi</option>
-                                <option value="lansia_asc">Lansia (60+) Terendah</option>
-                                <option value="total_desc">Total Tertinggi</option>
-                                <option value="total_asc">Total Terendah</option>
+                                <option value="balita_desc">Jumlah Balita Tertinggi</option>
+                                <option value="balita_asc">Jumlah Balita Terendah</option>
+                                <option value="persentase_desc">Persentase Tertinggi</option>
+                                <option value="persentase_asc">Persentase Terendah</option>
                             </select>
                         </div>
                         <div class="export-controls">
+                            <button class="btn-refresh" id="balita-refresh">
+                                <i class="fas fa-sync-alt"></i>
+                                Refresh
+                            </button>
                             <button class="btn-export" onclick="window.kelompokUmurDashboard?.exportData()">
                                 <i class="fas fa-download"></i>
                                 Export CSV
                             </button>
                         </div>
                     </div>
-                    <div id="distribusi_wilayah-table">
+                    <div id="balita-table">
+                        <!-- Table will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Anak Tab Content -->
+            <div id="anak-content" class="tab-content">
+                <div class="stats-grid" id="anak-stats">
+                    <!-- Stats will be populated by JavaScript -->
+                </div>
+
+                <div class="kelompok-chart-container">
+                    <div class="comparison-chart">
+                        <h3>Distribusi Anak (5-14) per Wilayah</h3>
+                        <div class="chart-container">
+                            <canvas id="anak-bar-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="comparison-chart">
+                        <h3>Proporsi Anak per Wilayah</h3>
+                        <div class="chart-container">
+                            <canvas id="anak-pie-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <div class="table-controls-header">
+                        <div class="search-container">
+                            <label for="anak-search">Cari:</label>
+                            <input type="text" id="anak-search" placeholder="Cari wilayah..." class="search-input">
+                        </div>
+                        <div class="sort-container">
+                            <label for="anak-sort">Urutkan:</label>
+                            <select id="anak-sort" class="sort-select">
+                                <option value="kode_asc">Kode Wilayah A-Z</option>
+                                <option value="kode_desc">Kode Wilayah Z-A</option>
+                                <option value="wilayah_asc">Wilayah A-Z</option>
+                                <option value="wilayah_desc">Wilayah Z-A</option>
+                                <option value="anak_desc">Jumlah Anak Tertinggi</option>
+                                <option value="anak_asc">Jumlah Anak Terendah</option>
+                                <option value="persentase_desc">Persentase Tertinggi</option>
+                                <option value="persentase_asc">Persentase Terendah</option>
+                            </select>
+                        </div>
+                        <div class="export-controls">
+                            <button class="btn-refresh" id="anak-refresh">
+                                <i class="fas fa-sync-alt"></i>
+                                Refresh
+                            </button>
+                            <button class="btn-export" onclick="window.kelompokUmurDashboard?.exportData()">
+                                <i class="fas fa-download"></i>
+                                Export CSV
+                            </button>
+                        </div>
+                    </div>
+                    <div id="anak-table">
+                        <!-- Table will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dewasa Tab Content -->
+            <div id="dewasa-content" class="tab-content">
+                <div class="stats-grid" id="dewasa-stats">
+                    <!-- Stats will be populated by JavaScript -->
+                </div>
+
+                <div class="kelompok-chart-container">
+                    <div class="comparison-chart">
+                        <h3>Distribusi Dewasa (15-59) per Wilayah</h3>
+                        <div class="chart-container">
+                            <canvas id="dewasa-bar-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="comparison-chart">
+                        <h3>Proporsi Dewasa per Wilayah</h3>
+                        <div class="chart-container">
+                            <canvas id="dewasa-pie-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <div class="table-controls-header">
+                        <div class="search-container">
+                            <label for="dewasa-search">Cari:</label>
+                            <input type="text" id="dewasa-search" placeholder="Cari wilayah..." class="search-input">
+                        </div>
+                        <div class="sort-container">
+                            <label for="dewasa-sort">Urutkan:</label>
+                            <select id="dewasa-sort" class="sort-select">
+                                <option value="kode_asc">Kode Wilayah A-Z</option>
+                                <option value="kode_desc">Kode Wilayah Z-A</option>
+                                <option value="wilayah_asc">Wilayah A-Z</option>
+                                <option value="wilayah_desc">Wilayah Z-A</option>
+                                <option value="dewasa_desc">Jumlah Dewasa Tertinggi</option>
+                                <option value="dewasa_asc">Jumlah Dewasa Terendah</option>
+                                <option value="persentase_desc">Persentase Tertinggi</option>
+                                <option value="persentase_asc">Persentase Terendah</option>
+                            </select>
+                        </div>
+                        <div class="export-controls">
+                            <button class="btn-refresh" id="dewasa-refresh">
+                                <i class="fas fa-sync-alt"></i>
+                                Refresh
+                            </button>
+                            <button class="btn-export" onclick="window.kelompokUmurDashboard?.exportData()">
+                                <i class="fas fa-download"></i>
+                                Export CSV
+                            </button>
+                        </div>
+                    </div>
+                    <div id="dewasa-table">
+                        <!-- Table will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lansia Tab Content -->
+            <div id="lansia-content" class="tab-content">
+                <div class="stats-grid" id="lansia-stats">
+                    <!-- Stats will be populated by JavaScript -->
+                </div>
+
+                <div class="kelompok-chart-container">
+                    <div class="comparison-chart">
+                        <h3>Distribusi Lansia (60+) per Wilayah</h3>
+                        <div class="chart-container">
+                            <canvas id="lansia-bar-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="comparison-chart">
+                        <h3>Proporsi Lansia per Wilayah</h3>
+                        <div class="chart-container">
+                            <canvas id="lansia-pie-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <div class="table-controls-header">
+                        <div class="search-container">
+                            <label for="lansia-search">Cari:</label>
+                            <input type="text" id="lansia-search" placeholder="Cari wilayah..." class="search-input">
+                        </div>
+                        <div class="sort-container">
+                            <label for="lansia-sort">Urutkan:</label>
+                            <select id="lansia-sort" class="sort-select">
+                                <option value="kode_asc">Kode Wilayah A-Z</option>
+                                <option value="kode_desc">Kode Wilayah Z-A</option>
+                                <option value="wilayah_asc">Wilayah A-Z</option>
+                                <option value="wilayah_desc">Wilayah Z-A</option>
+                                <option value="lansia_desc">Jumlah Lansia Tertinggi</option>
+                                <option value="lansia_asc">Jumlah Lansia Terendah</option>
+                                <option value="persentase_desc">Persentase Tertinggi</option>
+                                <option value="persentase_asc">Persentase Terendah</option>
+                            </select>
+                        </div>
+                        <div class="export-controls">
+                            <button class="btn-refresh" id="lansia-refresh">
+                                <i class="fas fa-sync-alt"></i>
+                                Refresh
+                            </button>
+                            <button class="btn-export" onclick="window.kelompokUmurDashboard?.exportData()">
+                                <i class="fas fa-download"></i>
+                                Export CSV
+                            </button>
+                        </div>
+                    </div>
+                    <div id="lansia-table">
                         <!-- Table will be populated by JavaScript -->
                     </div>
                 </div>
@@ -217,7 +396,6 @@
 
     <!-- Scripts -->
     <script>window.API_BASE_URL = '../../api/';</script>
-    <script src="../../assets/js/utils.js"></script>
     <script src="../../assets/js/main.js"></script>
     <script src="../../assets/js/api.js"></script>
     <script src="../../assets/js/dashboard/common.js"></script>
