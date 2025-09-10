@@ -92,7 +92,6 @@ try {
             $sql .= " ORDER BY TOTAL DESC";
     }
 
-    $sql .= " LIMIT " . $limit;
 
     // Execute query
     $stmt = $db->prepare($sql);
