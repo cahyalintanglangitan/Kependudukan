@@ -91,16 +91,20 @@ body {
     --card-color: #f39c12;
 }
 
-.stat-card.total {
-    --card-color: #9b59b6;
+.stat-card.mental {
+    --card-color: #9b59b6;  /* Sudah ada */
 }
 
-.stat-card.mental {
-    --card-color: #e91e63;
+.stat-card.fisik-mental {
+    --card-color: #e91e63;  /* Perlu ditambahkan dengan nama class yang benar */
 }
 
 .stat-card.lainnya {
-    --card-color: #e74c3c;
+    --card-color: #e74c3c;  /* Sudah ada */
+}
+
+.stat-card.total {
+    --card-color: #9b59b6;
 }
 
 .stat-card h3 {

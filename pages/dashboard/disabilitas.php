@@ -48,17 +48,21 @@
         </select>
     </div>
 
-    <div class="filter-group">
-        <label for="sortFilter">Urutkan Berdasarkan</label>
-        <select id="sortFilter">
-            <option value="total_desc">Total Tertinggi</option>
-            <option value="total_asc">Total Terendah</option>
-            <option value="name_asc">Nama A-Z</option>
-            <option value="name_desc">Nama Z-A</option>
-            <option value="fisik_desc">Fisik Tertinggi</option>
-            <option value="mental_desc">Mental Tertinggi</option>
-        </select>
-    </div>
+<div class="filter-group">
+    <label for="sortFilter">Urutkan Berdasarkan</label>
+    <select id="sortFilter">
+        <option value="total_desc">Total Tertinggi</option>
+        <option value="total_asc">Total Terendah</option>
+        <option value="name_asc">Nama A-Z</option>
+        <option value="name_desc">Nama Z-A</option>
+        <option value="fisik_desc">Fisik Tertinggi</option>
+        <option value="netra_desc">Netra Tertinggi</option>
+        <option value="rungu_desc">Rungu/Wicara Tertinggi</option>
+        <option value="mental_desc">Mental Tertinggi</option>
+        <option value="fisik_mental_desc">Fisik & Mental Tertinggi</option>
+        <option value="lainnya_desc">Lainnya Tertinggi</option>
+    </select>
+</div>
 
     <div class="filter-group">
         <label>&nbsp;</label>
@@ -89,6 +93,24 @@
             <div class="stat-card rungu">
                 <h3>Disabilitas Rungu/Wicara</h3>
                 <div class="value" id="statRungu">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+            <div class="stat-card mental">
+                <h3>Disabilitas Mental</h3>
+                <div class="value" id="statMental">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+            <div class="stat-card fisik-mental">
+                <h3>Disabilitas Fisik & Mental</h3>
+                <div class="value" id="statFisikMental">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>            
+            <div class="stat-card lainnya">
+                <h3>Disabilitas Lainnya</h3>
+                <div class="value" id="statLainnya">
                     <div class="loading-spinner"></div>
                 </div>
             </div>

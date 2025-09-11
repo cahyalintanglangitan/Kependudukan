@@ -35,7 +35,7 @@ class DisabilitasDashboard {
     async loadData() {
         try {
             // Show loading state
-            const loadingElements = ['statFisik', 'statNetra', 'statRungu', 'statTotal'];
+            const loadingElements = ['statFisik', 'statNetra', 'statRungu', 'statMental', 'statFisikMental', 'statLainnya', 'statTotal'];
             window.DashboardCommon.showLoading(loadingElements);
 
             // Get current filter values
@@ -100,6 +100,9 @@ class DisabilitasDashboard {
             ['statFisik', 'total_fisik'],
             ['statNetra', 'total_netra'],
             ['statRungu', 'total_rungu'],
+            ['statMental', 'total_mental'],        
+            ['statFisikMental', 'total_fisik_mental'], 
+            ['statLainnya', 'total_lainnya'],   
             ['statTotal', 'grand_total']
         ];
         

@@ -85,8 +85,20 @@ try {
         case 'fisik_desc':
             $sql .= " ORDER BY `DISABILITAS FISIK` DESC";
             break;
+        case 'netra_desc':
+            $sql .= " ORDER BY `DISABILITAS NETRA/ BUTA` DESC";
+            break;
+        case 'rungu_desc':
+            $sql .= " ORDER BY `DISABILITAS RUNGU/ WICARA` DESC";
+            break;
         case 'mental_desc':
             $sql .= " ORDER BY `DISABILITAS MENTAL/ JIWA` DESC";
+            break;
+        case 'fisik_mental_desc':
+            $sql .= " ORDER BY `DISABILITAS FISIK DAN MENTAL` DESC";
+            break;
+        case 'lainnya_desc':
+            $sql .= " ORDER BY `DISABILITAS LAINNYA` DESC";
             break;
         default:
             $sql .= " ORDER BY TOTAL DESC";
@@ -161,15 +173,15 @@ if ($region_type === 'all' && $province === 'all') {
 
     // Clean stats data
     $processedStats = [
-        'total_fisik' => (int)$stats['total_fisik'] ?: 0,
-        'total_netra' => (int)$stats['total_netra'] ?: 0,
-        'total_rungu' => (int)$stats['total_rungu'] ?: 0,
-        'total_mental' => (int)$stats['total_mental'] ?: 0,
-        'total_fisik_mental' => (int)$stats['total_fisik_mental'] ?: 0,
-        'total_lainnya' => (int)$stats['total_lainnya'] ?: 0,
-        'grand_total' => (int)$stats['grand_total'] ?: 0,
-        'total_regions' => (int)$stats['total_regions'] ?: 0
-    ];
+    'total_fisik' => (int)$stats['total_fisik'] ?: 0,
+    'total_netra' => (int)$stats['total_netra'] ?: 0,
+    'total_rungu' => (int)$stats['total_rungu'] ?: 0,
+    'total_mental' => (int)$stats['total_mental'] ?: 0,           // ✓ Ada
+    'total_fisik_mental' => (int)$stats['total_fisik_mental'] ?: 0, // ✓ Ada  
+    'total_lainnya' => (int)$stats['total_lainnya'] ?: 0,          // ✓ Ada
+    'grand_total' => (int)$stats['grand_total'] ?: 0,
+    'total_regions' => (int)$stats['total_regions'] ?: 0
+];
 
     // Get province breakdown untuk dropdown/filter
     $province_sql = "SELECT 
