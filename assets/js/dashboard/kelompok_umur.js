@@ -3,19 +3,27 @@
 class KelompokUmurDashboard {
   constructor() {
     this.currentTab = "overview";
-    this.currentData = null;
     this.charts = {};
-    this.currentPage = 1;
-    this.itemsPerPage = 25;
-    this.currentSort = "kode_asc";
-    this.currentSearch = "";
+    this.data = {};
+    this.filteredData = {};
+    this.colors = {
+      balita: "#FF6B9D",
+      anak: "#4ECDC4",
+      dewasa: "#45B7D1",
+      lansia: "#96CEB4",
+      total: "#6C5CE7",
+      laki_laki: "#36A2EB",
+      perempuan: "#FF6384",
+    };
 
     this.init();
   }
 
-  init() {
+  async init() {
     this.setupEventListeners();
-    this.loadInitialData();
+    await this.loadAllData();
+    this.updateOverallStats();
+    this.renderCurrentTab();
   }
 
   setupEventListeners() {
@@ -28,392 +36,345 @@ class KelompokUmurDashboard {
     });
 
     // Search and sort for each tab
-    const tabs = ["overview", "balita", "anak", "dewasa", "lansia"];
-    tabs.forEach((tab) => {
+    ["overview", "balita", "anak", "dewasa", "lansia"].forEach((tab) => {
       const searchInput = document.getElementById(`${tab}-search`);
       const sortSelect = document.getElementById(`${tab}-sort`);
       const refreshBtn = document.getElementById(`${tab}-refresh`);
 
       if (searchInput) {
-        searchInput.addEventListener("input", () => {
-          this.currentSearch = searchInput.value;
-          this.currentPage = 1;
-          this.renderTable();
-        });
+        searchInput.addEventListener("input", () => this.handleSearch(tab));
       }
 
       if (sortSelect) {
-        sortSelect.addEventListener("change", () => {
-          this.currentSort = sortSelect.value;
-          this.currentPage = 1;
-          this.renderTable();
-        });
+        sortSelect.addEventListener("change", () => this.handleSort(tab));
       }
 
       if (refreshBtn) {
-        refreshBtn.addEventListener("click", () => {
-          this.loadInitialData();
-        });
+        refreshBtn.addEventListener("click", () => this.refreshData(tab));
       }
     });
   }
 
-  async loadInitialData() {
+  async loadAllData() {
     try {
-      this.showLoading();
-
-      // Load all kelompok umur data
-      const response = await fetch(`${window.API_BASE_URL}kelompok_umur.php`);
-      if (!response.ok) throw new Error("Failed to fetch data");
-
-      const data = await response.json();
-      this.currentData = data;
-
-      this.updateOverallStats();
-      this.renderCurrentTab();
+      // Load data for all age groups
+      await Promise.all([
+        this.loadOverviewData(),
+        this.loadBalitaData(),
+        this.loadAnakData(),
+        this.loadDewasaData(),
+        this.loadLansiaData(),
+      ]);
     } catch (error) {
-      console.error("Error loading data:", error);
-      this.showError("Gagal memuat data. Silakan coba lagi.");
+      console.error("Error loading kelompok umur data:", error);
+      this.showError("Gagal memuat data kelompok umur");
     }
   }
 
-  showLoading() {
-    const statElements = [
-      "statBalita",
-      "statAnak",
-      "statDewasa",
-      "statLansia",
-      "statTotal",
-    ];
-    statElements.forEach((id) => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.innerHTML = '<div class="loading-spinner"></div>';
-      }
-    });
+  async loadOverviewData() {
+    try {
+      const response = await window.api.get("kelompok_umur/overview");
+      this.data.overview = response.data || [];
+      this.filteredData.overview = [...this.data.overview];
+    } catch (error) {
+      console.error("Error loading overview data:", error);
+      this.data.overview = [];
+      this.filteredData.overview = [];
+    }
   }
 
-  showError(message) {
-    const statElements = [
-      "statBalita",
-      "statAnak",
-      "statDewasa",
-      "statLansia",
-      "statTotal",
-    ];
-    statElements.forEach((id) => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.innerHTML =
-          '<span style="color: #dc3545; font-size: 14px;">Error</span>';
-      }
-    });
+  async loadBalitaData() {
+    try {
+      const response = await window.api.get("kelompok_umur/balita");
+      this.data.balita = response.data || [];
+      this.filteredData.balita = [...this.data.balita];
+    } catch (error) {
+      console.error("Error loading balita data:", error);
+      this.data.balita = [];
+      this.filteredData.balita = [];
+    }
+  }
 
-    // Show error in current table
-    const tableContainer = document.getElementById(`${this.currentTab}-table`);
-    if (tableContainer) {
-      tableContainer.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>Terjadi Kesalahan</h3>
-                    <p>${message}</p>
+  async loadAnakData() {
+    try {
+      const response = await window.api.get("kelompok_umur/anak");
+      this.data.anak = response.data || [];
+      this.filteredData.anak = [...this.data.anak];
+    } catch (error) {
+      console.error("Error loading anak data:", error);
+      this.data.anak = [];
+      this.filteredData.anak = [];
+    }
+  }
+
+  async loadDewasaData() {
+    try {
+      const response = await window.api.get("kelompok_umur/dewasa");
+      this.data.dewasa = response.data || [];
+      this.filteredData.dewasa = [...this.data.dewasa];
+    } catch (error) {
+      console.error("Error loading dewasa data:", error);
+      this.data.dewasa = [];
+      this.filteredData.dewasa = [];
+    }
+  }
+
+  async loadLansiaData() {
+    try {
+      const response = await window.api.get("kelompok_umur/lansia");
+      this.data.lansia = response.data || [];
+      this.filteredData.lansia = [...this.data.lansia];
+    } catch (error) {
+      console.error("Error loading lansia data:", error);
+      this.data.lansia = [];
+      this.filteredData.lansia = [];
+    }
+  }
+
+  updateOverallStats() {
+    const stats = this.calculateOverallStats();
+
+    document.getElementById("statBalita").innerHTML = this.formatNumber(
+      stats.totalBalita
+    );
+    document.getElementById("statAnak").innerHTML = this.formatNumber(
+      stats.totalAnak
+    );
+    document.getElementById("statDewasa").innerHTML = this.formatNumber(
+      stats.totalDewasa
+    );
+    document.getElementById("statLansia").innerHTML = this.formatNumber(
+      stats.totalLansia
+    );
+    document.getElementById("statTotal").innerHTML = this.formatNumber(
+      stats.totalKeseluruhan
+    );
+  }
+
+  calculateOverallStats() {
+    const overview = this.data.overview || [];
+
+    return {
+      totalBalita: overview.reduce(
+        (sum, item) => sum + (parseInt(item.balita) || 0),
+        0
+      ),
+      totalAnak: overview.reduce(
+        (sum, item) => sum + (parseInt(item.anak) || 0),
+        0
+      ),
+      totalDewasa: overview.reduce(
+        (sum, item) => sum + (parseInt(item.dewasa) || 0),
+        0
+      ),
+      totalLansia: overview.reduce(
+        (sum, item) => sum + (parseInt(item.lansia) || 0),
+        0
+      ),
+      totalKeseluruhan: overview.reduce(
+        (sum, item) => sum + (parseInt(item.total) || 0),
+        0
+      ),
+    };
+  }
+
+  switchTab(tabId) {
+    // Update active tab button
+    document
+      .querySelectorAll(".tab-button")
+      .forEach((btn) => btn.classList.remove("active"));
+    document.querySelector(`[data-tab="${tabId}"]`).classList.add("active");
+
+    // Update active tab content
+    document
+      .querySelectorAll(".tab-content")
+      .forEach((content) => content.classList.remove("active"));
+    document.getElementById(`${tabId}-content`).classList.add("active");
+
+    this.currentTab = tabId;
+    this.renderCurrentTab();
+  }
+
+  renderCurrentTab() {
+    this.updateTabStats(this.currentTab);
+    this.renderCharts(this.currentTab);
+    this.renderTable(this.currentTab);
+  }
+
+  updateTabStats(tab) {
+    const statsContainer = document.getElementById(`${tab}-stats`);
+    if (!statsContainer) return;
+
+    const stats = this.calculateTabStats(tab);
+    statsContainer.innerHTML = this.generateTabStatsHTML(tab, stats);
+  }
+
+  calculateTabStats(tab) {
+    const data = this.filteredData[tab] || [];
+
+    if (tab === "overview") {
+      return {
+        totalWilayah: data.length,
+        totalBalita: data.reduce(
+          (sum, item) => sum + (parseInt(item.balita) || 0),
+          0
+        ),
+        totalAnak: data.reduce(
+          (sum, item) => sum + (parseInt(item.anak) || 0),
+          0
+        ),
+        totalDewasa: data.reduce(
+          (sum, item) => sum + (parseInt(item.dewasa) || 0),
+          0
+        ),
+        totalLansia: data.reduce(
+          (sum, item) => sum + (parseInt(item.lansia) || 0),
+          0
+        ),
+        totalKeseluruhan: data.reduce(
+          (sum, item) => sum + (parseInt(item.total) || 0),
+          0
+        ),
+      };
+    } else {
+      return {
+        totalWilayah: data.length,
+        totalLakiLaki: data.reduce(
+          (sum, item) => sum + (parseInt(item.laki_laki) || 0),
+          0
+        ),
+        totalPerempuan: data.reduce(
+          (sum, item) => sum + (parseInt(item.perempuan) || 0),
+          0
+        ),
+        totalKeseluruhan: data.reduce(
+          (sum, item) => sum + (parseInt(item.total) || 0),
+          0
+        ),
+      };
+    }
+  }
+
+  generateTabStatsHTML(tab, stats) {
+    if (tab === "overview") {
+      return `
+                <div class="stat-card">
+                    <h3>Total Wilayah</h3>
+                    <div class="value">${stats.totalWilayah}</div>
+                </div>
+                <div class="stat-card balita">
+                    <h3>Total Balita</h3>
+                    <div class="value">${this.formatNumber(
+                      stats.totalBalita
+                    )}</div>
+                </div>
+                <div class="stat-card anak">
+                    <h3>Total Anak</h3>
+                    <div class="value">${this.formatNumber(
+                      stats.totalAnak
+                    )}</div>
+                </div>
+                <div class="stat-card dewasa">
+                    <h3>Total Dewasa</h3>
+                    <div class="value">${this.formatNumber(
+                      stats.totalDewasa
+                    )}</div>
+                </div>
+                <div class="stat-card lansia">
+                    <h3>Total Lansia</h3>
+                    <div class="value">${this.formatNumber(
+                      stats.totalLansia
+                    )}</div>
+                </div>
+            `;
+    } else {
+      const ageGroupName = this.getAgeGroupName(tab);
+      return `
+                <div class="stat-card">
+                    <h3>Total Wilayah</h3>
+                    <div class="value">${stats.totalWilayah}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Laki-laki</h3>
+                    <div class="value">${this.formatNumber(
+                      stats.totalLakiLaki
+                    )}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Perempuan</h3>
+                    <div class="value">${this.formatNumber(
+                      stats.totalPerempuan
+                    )}</div>
+                </div>
+                <div class="stat-card total">
+                    <h3>Total ${ageGroupName}</h3>
+                    <div class="value">${this.formatNumber(
+                      stats.totalKeseluruhan
+                    )}</div>
                 </div>
             `;
     }
   }
 
-  updateOverallStats() {
-    if (!this.currentData) return;
-
-    // Calculate totals based on sample data provided
-    const stats = {
-      balita: 25837,
-      anak: 70203, // 34349 + 35853 + additional data
-      dewasa: 275633,
-      lansia: 108176,
-      total: 479851,
+  getAgeGroupName(tab) {
+    const names = {
+      balita: "Balita",
+      anak: "Anak",
+      dewasa: "Dewasa",
+      lansia: "Lansia",
     };
-
-    // Update stat cards
-    document.getElementById(
-      "statBalita"
-    ).innerHTML = `<span>${this.formatNumber(stats.balita)}</span>`;
-    document.getElementById("statAnak").innerHTML = `<span>${this.formatNumber(
-      stats.anak
-    )}</span>`;
-    document.getElementById(
-      "statDewasa"
-    ).innerHTML = `<span>${this.formatNumber(stats.dewasa)}</span>`;
-    document.getElementById(
-      "statLansia"
-    ).innerHTML = `<span>${this.formatNumber(stats.lansia)}</span>`;
-    document.getElementById("statTotal").innerHTML = `<span>${this.formatNumber(
-      stats.total
-    )}</span>`;
+    return names[tab] || tab;
   }
 
-  switchTab(tabId) {
-    // Update active tab button
-    document.querySelectorAll(".tab-button").forEach((btn) => {
-      btn.classList.remove("active");
-    });
-    document.querySelector(`[data-tab="${tabId}"]`).classList.add("active");
-
-    // Update active tab content
-    document.querySelectorAll(".tab-content").forEach((content) => {
-      content.classList.remove("active");
-    });
-    document.getElementById(`${tabId}-content`).classList.add("active");
-
-    this.currentTab = tabId;
-    this.currentPage = 1;
-    this.renderCurrentTab();
-  }
-
-  renderCurrentTab() {
-    switch (this.currentTab) {
-      case "overview":
-        this.renderOverviewTab();
-        break;
-      case "balita":
-        this.renderBalitaTab();
-        break;
-      case "anak":
-        this.renderAnakTab();
-        break;
-      case "dewasa":
-        this.renderDewasaTab();
-        break;
-      case "lansia":
-        this.renderLansiaTab();
-        break;
-    }
-  }
-
-  renderOverviewTab() {
-    this.createOverviewCharts();
-    this.renderOverviewTable();
-  }
-
-  renderBalitaTab() {
-    this.updateTabStats("balita");
-    this.createAgeGroupCharts("balita");
-    this.renderTable();
-  }
-
-  renderAnakTab() {
-    this.updateTabStats("anak");
-    this.createAgeGroupCharts("anak");
-    this.renderTable();
-  }
-
-  renderDewasaTab() {
-    this.updateTabStats("dewasa");
-    this.createAgeGroupCharts("dewasa");
-    this.renderTable();
-  }
-
-  renderLansiaTab() {
-    this.updateTabStats("lansia");
-    this.createAgeGroupCharts("lansia");
-    this.renderTable();
-  }
-
-  updateTabStats(ageGroup) {
-    const statsContainer = document.getElementById(`${ageGroup}-stats`);
-    if (!statsContainer) return;
-
-    // Sample stats for each age group
-    const groupStats = {
-      balita: {
-        total: 25837,
-        percentage: 5.4,
-        highest: "Aceh Utara",
-        lowest: "Aceh Jaya",
-      },
-      anak: {
-        total: 70203,
-        percentage: 14.7,
-        highest: "Aceh Besar",
-        lowest: "Aceh Singkil",
-      },
-      dewasa: {
-        total: 275633,
-        percentage: 57.4,
-        highest: "Banda Aceh",
-        lowest: "Aceh Tamiang",
-      },
-      lansia: {
-        total: 108176,
-        percentage: 22.5,
-        highest: "Aceh Barat",
-        lowest: "Aceh Selatan",
-      },
-    };
-
-    const stats = groupStats[ageGroup];
-
-    statsContainer.innerHTML = `
-            <div class="stat-card">
-                <h3>Total ${this.getAgeGroupLabel(ageGroup)}</h3>
-                <div class="value">${this.formatNumber(stats.total)}</div>
-            </div>
-            <div class="stat-card">
-                <h3>Persentase dari Total</h3>
-                <div class="value">${stats.percentage}%</div>
-            </div>
-            <div class="stat-card">
-                <h3>Wilayah Tertinggi</h3>
-                <div class="value" style="font-size: 18px;">${
-                  stats.highest
-                }</div>
-            </div>
-            <div class="stat-card">
-                <h3>Wilayah Terendah</h3>
-                <div class="value" style="font-size: 18px;">${
-                  stats.lowest
-                }</div>
-            </div>
-        `;
-  }
-
-  createOverviewCharts() {
+  renderCharts(tab) {
     // Destroy existing charts
-    if (this.charts["overview-pie"]) this.charts["overview-pie"].destroy();
-    if (this.charts["overview-bar"]) this.charts["overview-bar"].destroy();
-
-    // Pie Chart - Age Group Distribution
-    const pieCtx = document.getElementById("overview-pie-chart");
-    if (pieCtx) {
-      this.charts["overview-pie"] = new Chart(pieCtx, {
-        type: "pie",
-        data: {
-          labels: [
-            "Balita (0-4)",
-            "Anak (5-14)",
-            "Dewasa (15-59)",
-            "Lansia (60+)",
-          ],
-          datasets: [
-            {
-              data: [25837, 70203, 275633, 108176],
-              backgroundColor: ["#ff6b6b", "#4ecdc4", "#45b7d1", "#96ceb4"],
-              borderWidth: 2,
-              borderColor: "#fff",
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: "bottom",
-            },
-            tooltip: {
-              callbacks: {
-                label: (context) => {
-                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                  const percentage = ((context.raw / total) * 100).toFixed(1);
-                  return `${context.label}: ${this.formatNumber(
-                    context.raw
-                  )} (${percentage}%)`;
-                },
-              },
-            },
-          },
-        },
-      });
+    if (this.charts[`${tab}-bar`]) {
+      this.charts[`${tab}-bar`].destroy();
+    }
+    if (this.charts[`${tab}-pie`]) {
+      this.charts[`${tab}-pie`].destroy();
     }
 
-    // Bar Chart - Sample regional comparison
-    const barCtx = document.getElementById("overview-bar-chart");
-    if (barCtx) {
-      this.charts["overview-bar"] = new Chart(barCtx, {
+    // Render new charts
+    this.renderBarChart(tab);
+    this.renderPieChart(tab);
+  }
+
+  renderBarChart(tab) {
+    const canvas = document.getElementById(`${tab}-bar-chart`);
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    const data = this.filteredData[tab] || [];
+
+    if (tab === "overview") {
+      this.charts[`${tab}-bar`] = new Chart(ctx, {
         type: "bar",
         data: {
-          labels: [
-            "Banda Aceh",
-            "Aceh Besar",
-            "Aceh Utara",
-            "Aceh Barat",
-            "Aceh Selatan",
-          ],
+          labels: data.map((item) => item.nama_wilayah),
           datasets: [
             {
               label: "Balita",
-              data: [1200, 950, 1100, 800, 750],
-              backgroundColor: "#ff6b6b",
+              data: data.map((item) => parseInt(item.balita) || 0),
+              backgroundColor: this.colors.balita,
+              borderWidth: 1,
             },
             {
               label: "Anak",
-              data: [3200, 2800, 3100, 2500, 2200],
-              backgroundColor: "#4ecdc4",
+              data: data.map((item) => parseInt(item.anak) || 0),
+              backgroundColor: this.colors.anak,
+              borderWidth: 1,
             },
             {
               label: "Dewasa",
-              data: [12000, 11000, 10500, 9500, 9000],
-              backgroundColor: "#45b7d1",
+              data: data.map((item) => parseInt(item.dewasa) || 0),
+              backgroundColor: this.colors.dewasa,
+              borderWidth: 1,
             },
             {
               label: "Lansia",
-              data: [4500, 4200, 3800, 3500, 3200],
-              backgroundColor: "#96ceb4",
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              stacked: true,
-            },
-            y: {
-              stacked: true,
-              beginAtZero: true,
-            },
-          },
-          plugins: {
-            legend: {
-              position: "bottom",
-            },
-          },
-        },
-      });
-    }
-  }
-
-  createAgeGroupCharts(ageGroup) {
-    // Destroy existing charts
-    if (this.charts[`${ageGroup}-bar`])
-      this.charts[`${ageGroup}-bar`].destroy();
-    if (this.charts[`${ageGroup}-pie`])
-      this.charts[`${ageGroup}-pie`].destroy();
-
-    const colors = {
-      balita: "#ff6b6b",
-      anak: "#4ecdc4",
-      dewasa: "#45b7d1",
-      lansia: "#96ceb4",
-    };
-
-    // Sample data for charts
-    const sampleData = this.generateSampleData(ageGroup);
-
-    // Bar Chart
-    const barCtx = document.getElementById(`${ageGroup}-bar-chart`);
-    if (barCtx) {
-      this.charts[`${ageGroup}-bar`] = new Chart(barCtx, {
-        type: "bar",
-        data: {
-          labels: sampleData.labels,
-          datasets: [
-            {
-              label: this.getAgeGroupLabel(ageGroup),
-              data: sampleData.values,
-              backgroundColor: colors[ageGroup],
-              borderColor: colors[ageGroup],
+              data: data.map((item) => parseInt(item.lansia) || 0),
+              backgroundColor: this.colors.lansia,
               borderWidth: 1,
             },
           ],
@@ -424,34 +385,124 @@ class KelompokUmurDashboard {
           scales: {
             y: {
               beginAtZero: true,
+              ticks: {
+                callback: function (value) {
+                  return value.toLocaleString("id-ID");
+                },
+              },
+            },
+            x: {
+              ticks: {
+                maxRotation: 45,
+                minRotation: 45,
+              },
             },
           },
           plugins: {
-            legend: {
-              display: false,
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  return (
+                    context.dataset.label +
+                    ": " +
+                    context.parsed.y.toLocaleString("id-ID")
+                  );
+                },
+              },
+            },
+          },
+        },
+      });
+    } else {
+      this.charts[`${tab}-bar`] = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: data.map((item) => item.nama_wilayah),
+          datasets: [
+            {
+              label: `Total ${this.getAgeGroupName(tab)}`,
+              data: data.map((item) => parseInt(item.total) || 0),
+              backgroundColor: this.colors[tab],
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function (value) {
+                  return value.toLocaleString("id-ID");
+                },
+              },
+            },
+            x: {
+              ticks: {
+                maxRotation: 45,
+                minRotation: 45,
+              },
+            },
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  return (
+                    context.dataset.label +
+                    ": " +
+                    context.parsed.y.toLocaleString("id-ID")
+                  );
+                },
+              },
             },
           },
         },
       });
     }
+  }
 
-    // Pie Chart
-    const pieCtx = document.getElementById(`${ageGroup}-pie-chart`);
-    if (pieCtx) {
-      this.charts[`${ageGroup}-pie`] = new Chart(pieCtx, {
+  renderPieChart(tab) {
+    const canvas = document.getElementById(`${tab}-pie-chart`);
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    const data = this.filteredData[tab] || [];
+
+    if (tab === "overview") {
+      const totals = {
+        balita: data.reduce(
+          (sum, item) => sum + (parseInt(item.balita) || 0),
+          0
+        ),
+        anak: data.reduce((sum, item) => sum + (parseInt(item.anak) || 0), 0),
+        dewasa: data.reduce(
+          (sum, item) => sum + (parseInt(item.dewasa) || 0),
+          0
+        ),
+        lansia: data.reduce(
+          (sum, item) => sum + (parseInt(item.lansia) || 0),
+          0
+        ),
+      };
+
+      this.charts[`${tab}-pie`] = new Chart(ctx, {
         type: "pie",
         data: {
-          labels: sampleData.labels.slice(0, 5),
+          labels: ["Balita", "Anak", "Dewasa", "Lansia"],
           datasets: [
             {
-              data: sampleData.values.slice(0, 5),
+              data: [totals.balita, totals.anak, totals.dewasa, totals.lansia],
               backgroundColor: [
-                colors[ageGroup],
-                this.adjustColor(colors[ageGroup], -20),
-                this.adjustColor(colors[ageGroup], -40),
-                this.adjustColor(colors[ageGroup], -60),
-                this.adjustColor(colors[ageGroup], -80),
+                this.colors.balita,
+                this.colors.anak,
+                this.colors.dewasa,
+                this.colors.lansia,
               ],
+              borderWidth: 2,
+              borderColor: "#fff",
             },
           ],
         },
@@ -459,8 +510,73 @@ class KelompokUmurDashboard {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: {
-              position: "bottom",
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = ((context.parsed * 100) / total).toFixed(
+                    1
+                  );
+                  return (
+                    context.label +
+                    ": " +
+                    context.parsed.toLocaleString("id-ID") +
+                    " (" +
+                    percentage +
+                    "%)"
+                  );
+                },
+              },
+            },
+          },
+        },
+      });
+    } else {
+      const totals = {
+        laki_laki: data.reduce(
+          (sum, item) => sum + (parseInt(item.laki_laki) || 0),
+          0
+        ),
+        perempuan: data.reduce(
+          (sum, item) => sum + (parseInt(item.perempuan) || 0),
+          0
+        ),
+      };
+
+      this.charts[`${tab}-pie`] = new Chart(ctx, {
+        type: "pie",
+        data: {
+          labels: ["Laki-laki", "Perempuan"],
+          datasets: [
+            {
+              data: [totals.laki_laki, totals.perempuan],
+              backgroundColor: [this.colors.laki_laki, this.colors.perempuan],
+              borderWidth: 2,
+              borderColor: "#fff",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = ((context.parsed * 100) / total).toFixed(
+                    1
+                  );
+                  return (
+                    context.label +
+                    ": " +
+                    context.parsed.toLocaleString("id-ID") +
+                    " (" +
+                    percentage +
+                    "%)"
+                  );
+                },
+              },
             },
           },
         },
@@ -468,560 +584,335 @@ class KelompokUmurDashboard {
     }
   }
 
-  renderOverviewTable() {
-    const tableContainer = document.getElementById("overview-table");
-    if (!tableContainer) return;
+  renderTable(tab) {
+    const container = document.getElementById(`${tab}-table`);
+    if (!container) return;
 
-    // Sample comprehensive data
-    const sampleData = [
-      {
-        kode: "11.00",
-        wilayah: "ACEH",
-        balita: 25837,
-        anak: 70203,
-        dewasa: 275633,
-        lansia: 108176,
-        total: 479851,
-      },
-      {
-        kode: "11.01",
-        wilayah: "ACEH SELATAN",
-        balita: 1200,
-        anak: 3200,
-        dewasa: 12000,
-        lansia: 4500,
-        total: 20900,
-      },
-      {
-        kode: "11.02",
-        wilayah: "ACEH TENGGARA",
-        balita: 950,
-        anak: 2800,
-        dewasa: 11000,
-        lansia: 4200,
-        total: 18950,
-      },
-      {
-        kode: "11.03",
-        wilayah: "ACEH TIMUR",
-        balita: 1100,
-        anak: 3100,
-        dewasa: 10500,
-        lansia: 3800,
-        total: 18500,
-      },
-      {
-        kode: "11.04",
-        wilayah: "ACEH TENGAH",
-        balita: 800,
-        anak: 2500,
-        dewasa: 9500,
-        lansia: 3500,
-        total: 16300,
-      },
-      {
-        kode: "11.05",
-        wilayah: "ACEH BARAT",
-        balita: 750,
-        anak: 2200,
-        dewasa: 9000,
-        lansia: 3200,
-        total: 15150,
-      },
-    ];
+    const data = this.filteredData[tab] || [];
 
-    this.renderDataTable(tableContainer, sampleData, "overview");
-  }
-
-  renderTable() {
-    const tableContainer = document.getElementById(`${this.currentTab}-table`);
-    if (!tableContainer || this.currentTab === "overview") return;
-
-    // Sample data for specific age group
-    const sampleData = this.generateTableData(this.currentTab);
-    this.renderDataTable(tableContainer, sampleData, this.currentTab);
-  }
-
-  renderDataTable(container, data, type) {
-    if (!data || data.length === 0) {
-      container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-table"></i>
-                    <h3>Tidak ada data</h3>
-                    <p>Data tidak tersedia untuk ditampilkan</p>
-                </div>
-            `;
+    if (data.length === 0) {
+      container.innerHTML = this.getEmptyStateHTML();
       return;
     }
 
-    // Filter and sort data
-    let filteredData = this.filterData(data);
-    let sortedData = this.sortData(filteredData);
-
-    // Pagination
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const paginatedData = sortedData.slice(
-      startIndex,
-      startIndex + this.itemsPerPage
-    );
-
-    let tableHTML = '<table class="data-table">';
-
-    // Table header
-    if (type === "overview") {
-      tableHTML += `
+    container.innerHTML = `
+            <table class="data-table">
                 <thead>
-                    <tr>
-                        <th>Kode Wilayah</th>
-                        <th>Wilayah</th>
-                        <th>Balita (0-4)</th>
-                        <th>Anak (5-14)</th>
-                        <th>Dewasa (15-59)</th>
-                        <th>Lansia (60+)</th>
-                        <th>Total</th>
-                    </tr>
+                    ${this.getTableHeaderHTML(tab)}
                 </thead>
+                <tbody>
+                    ${data
+                      .map((item) => this.getTableRowHTML(tab, item))
+                      .join("")}
+                </tbody>
+            </table>
+        `;
+  }
+
+  getTableHeaderHTML(tab) {
+    if (tab === "overview") {
+      return `
+                <tr>
+                    <th>Kode Wilayah</th>
+                    <th>Nama Wilayah</th>
+                    <th class="text-center">Balita</th>
+                    <th class="text-center">Anak</th>
+                    <th class="text-center">Dewasa</th>
+                    <th class="text-center">Lansia</th>
+                    <th class="text-center">Total</th>
+                </tr>
             `;
     } else {
-      tableHTML += `
-                <thead>
-                    <tr>
-                        <th>Kode Wilayah</th>
-                        <th>Wilayah</th>
-                        <th>Jumlah ${this.getAgeGroupLabel(type)}</th>
-                        <th>Persentase</th>
-                    </tr>
-                </thead>
+      return `
+                <tr>
+                    <th>Kode Wilayah</th>
+                    <th>Nama Wilayah</th>
+                    <th class="text-center">Laki-laki</th>
+                    <th class="text-center">Perempuan</th>
+                    <th class="text-center">Total</th>
+                </tr>
             `;
     }
-
-    // Table body
-    tableHTML += "<tbody>";
-    paginatedData.forEach((row) => {
-      if (type === "overview") {
-        tableHTML += `
-                    <tr>
-                        <td>${row.kode}</td>
-                        <td>${row.wilayah}</td>
-                        <td>${this.formatNumber(row.balita)}</td>
-                        <td>${this.formatNumber(row.anak)}</td>
-                        <td>${this.formatNumber(row.dewasa)}</td>
-                        <td>${this.formatNumber(row.lansia)}</td>
-                        <td><strong>${this.formatNumber(
-                          row.total
-                        )}</strong></td>
-                    </tr>
-                `;
-      } else {
-        const percentage = ((row.value / row.total) * 100).toFixed(1);
-        tableHTML += `
-                    <tr>
-                        <td>${row.kode}</td>
-                        <td>${row.wilayah}</td>
-                        <td>${this.formatNumber(row.value)}</td>
-                        <td><span class="${this.getPercentageClass(
-                          percentage
-                        )}">${percentage}%</span></td>
-                    </tr>
-                `;
-      }
-    });
-    tableHTML += "</tbody></table>";
-
-    // Add pagination
-    tableHTML += this.generatePagination(sortedData.length);
-
-    container.innerHTML = tableHTML;
   }
 
-  generateSampleData(ageGroup) {
-    const regions = [
-      "Banda Aceh",
-      "Aceh Besar",
-      "Aceh Utara",
-      "Aceh Barat",
-      "Aceh Selatan",
-      "Aceh Timur",
-    ];
-    const baseValues = {
-      balita: [1200, 950, 1100, 800, 750, 900],
-      anak: [3200, 2800, 3100, 2500, 2200, 2600],
-      dewasa: [12000, 11000, 10500, 9500, 9000, 9800],
-      lansia: [4500, 4200, 3800, 3500, 3200, 3600],
-    };
-
-    return {
-      labels: regions,
-      values: baseValues[ageGroup],
-    };
+  getTableRowHTML(tab, item) {
+    if (tab === "overview") {
+      return `
+                <tr>
+                    <td>${item.kode_wilayah || "-"}</td>
+                    <td>${item.nama_wilayah || "-"}</td>
+                    <td class="text-center number">${this.formatNumber(
+                      item.balita || 0
+                    )}</td>
+                    <td class="text-center number">${this.formatNumber(
+                      item.anak || 0
+                    )}</td>
+                    <td class="text-center number">${this.formatNumber(
+                      item.dewasa || 0
+                    )}</td>
+                    <td class="text-center number">${this.formatNumber(
+                      item.lansia || 0
+                    )}</td>
+                    <td class="text-center number"><strong>${this.formatNumber(
+                      item.total || 0
+                    )}</strong></td>
+                </tr>
+            `;
+    } else {
+      return `
+                <tr>
+                    <td>${item.kode_wilayah || "-"}</td>
+                    <td>${item.nama_wilayah || "-"}</td>
+                    <td class="text-center number">${this.formatNumber(
+                      item.laki_laki || 0
+                    )}</td>
+                    <td class="text-center number">${this.formatNumber(
+                      item.perempuan || 0
+                    )}</td>
+                    <td class="text-center number"><strong>${this.formatNumber(
+                      item.total || 0
+                    )}</strong></td>
+                </tr>
+            `;
+    }
   }
 
-  generateTableData(ageGroup) {
-    const sampleData = [
-      {
-        kode: "11.01",
-        wilayah: "ACEH SELATAN",
-        balita: 1200,
-        anak: 3200,
-        dewasa: 12000,
-        lansia: 4500,
-        total: 20900,
-      },
-      {
-        kode: "11.02",
-        wilayah: "ACEH TENGGARA",
-        balita: 950,
-        anak: 2800,
-        dewasa: 11000,
-        lansia: 4200,
-        total: 18950,
-      },
-      {
-        kode: "11.03",
-        wilayah: "ACEH TIMUR",
-        balita: 1100,
-        anak: 3100,
-        dewasa: 10500,
-        lansia: 3800,
-        total: 18500,
-      },
-      {
-        kode: "11.04",
-        wilayah: "ACEH TENGAH",
-        balita: 800,
-        anak: 2500,
-        dewasa: 9500,
-        lansia: 3500,
-        total: 16300,
-      },
-      {
-        kode: "11.05",
-        wilayah: "ACEH BARAT",
-        balita: 750,
-        anak: 2200,
-        dewasa: 9000,
-        lansia: 3200,
-        total: 15150,
-      },
-    ];
+  handleSearch(tab) {
+    const searchInput = document.getElementById(`${tab}-search`);
+    const searchTerm = searchInput.value.toLowerCase().trim();
 
-    return sampleData.map((item) => ({
-      kode: item.kode,
-      wilayah: item.wilayah,
-      value: item[ageGroup],
-      total: item.total,
-    }));
+    if (searchTerm === "") {
+      this.filteredData[tab] = [...this.data[tab]];
+    } else {
+      this.filteredData[tab] = this.data[tab].filter(
+        (item) =>
+          (item.nama_wilayah &&
+            item.nama_wilayah.toLowerCase().includes(searchTerm)) ||
+          (item.kode_wilayah &&
+            item.kode_wilayah.toLowerCase().includes(searchTerm))
+      );
+    }
+
+    this.handleSort(tab);
   }
 
-  filterData(data) {
-    if (!this.currentSearch) return data;
+  handleSort(tab) {
+    const sortSelect = document.getElementById(`${tab}-sort`);
+    const sortValue = sortSelect.value;
 
-    return data.filter(
-      (item) =>
-        item.wilayah.toLowerCase().includes(this.currentSearch.toLowerCase()) ||
-        item.kode.toLowerCase().includes(this.currentSearch.toLowerCase())
-    );
-  }
+    if (!sortValue) return;
 
-  sortData(data) {
-    const [field, direction] = this.currentSort.split("_");
+    const [field, direction] = sortValue.split("_");
+    const isAsc = direction === "asc";
 
-    return data.sort((a, b) => {
+    this.filteredData[tab].sort((a, b) => {
       let valueA, valueB;
 
-      switch (field) {
-        case "kode":
-          valueA = a.kode;
-          valueB = b.kode;
-          break;
-        case "wilayah":
-          valueA = a.wilayah;
-          valueB = b.wilayah;
-          break;
-        case "total":
-          valueA = a.total;
-          valueB = b.total;
-          break;
-        case "balita":
-          valueA = a.balita || a.value;
-          valueB = b.balita || b.value;
-          break;
-        case "anak":
-        case "dewasa":
-        case "lansia":
-          valueA = a[field] || a.value;
-          valueB = b[field] || b.value;
-          break;
-        case "persentase":
-          valueA = (a.value / a.total) * 100;
-          valueB = (b.value / b.total) * 100;
-          break;
-        default:
-          valueA = a[field];
-          valueB = b[field];
-      }
+      if (field === "kode" || field === "wilayah") {
+        const fieldName = field === "kode" ? "kode_wilayah" : "nama_wilayah";
+        valueA = (a[fieldName] || "").toString().toLowerCase();
+        valueB = (b[fieldName] || "").toString().toLowerCase();
 
-      if (typeof valueA === "string") {
-        valueA = valueA.toLowerCase();
-        valueB = valueB.toLowerCase();
-      }
-
-      if (direction === "asc") {
-        return valueA > valueB ? 1 : -1;
+        if (isAsc) {
+          return valueA.localeCompare(valueB);
+        } else {
+          return valueB.localeCompare(valueA);
+        }
       } else {
-        return valueA < valueB ? 1 : -1;
+        // Numeric fields
+        valueA = parseInt(a[field]) || 0;
+        valueB = parseInt(b[field]) || 0;
+
+        if (isAsc) {
+          return valueA - valueB;
+        } else {
+          return valueB - valueA;
+        }
+      }
+    });
+
+    this.renderTable(tab);
+    this.updateTabStats(tab);
+  }
+
+  async refreshData(tab) {
+    const refreshBtn = document.getElementById(`${tab}-refresh`);
+    const originalHTML = refreshBtn.innerHTML;
+
+    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+    refreshBtn.disabled = true;
+
+    try {
+      if (tab === "overview") {
+        await this.loadOverviewData();
+      } else {
+        await this[`load${tab.charAt(0).toUpperCase() + tab.slice(1)}Data`]();
+      }
+
+      // Reset search and sort
+      const searchInput = document.getElementById(`${tab}-search`);
+      const sortSelect = document.getElementById(`${tab}-sort`);
+
+      if (searchInput) searchInput.value = "";
+      if (sortSelect) sortSelect.value = "kode_asc";
+
+      this.renderCurrentTab();
+
+      if (tab === "overview") {
+        this.updateOverallStats();
+      }
+    } catch (error) {
+      console.error(`Error refreshing ${tab} data:`, error);
+      this.showError(`Gagal memuat ulang data ${this.getAgeGroupName(tab)}`);
+    } finally {
+      refreshBtn.innerHTML = originalHTML;
+      refreshBtn.disabled = false;
+    }
+  }
+
+  exportData() {
+    const data = this.filteredData[this.currentTab] || [];
+
+    if (data.length === 0) {
+      alert("Tidak ada data untuk diekspor");
+      return;
+    }
+
+    let csvContent = "";
+    let filename = "";
+
+    if (this.currentTab === "overview") {
+      csvContent =
+        "Kode Wilayah,Nama Wilayah,Balita,Anak,Dewasa,Lansia,Total\n";
+      csvContent += data
+        .map(
+          (item) =>
+            `"${item.kode_wilayah}","${item.nama_wilayah}",${
+              item.balita || 0
+            },${item.anak || 0},${item.dewasa || 0},${item.lansia || 0},${
+              item.total || 0
+            }`
+        )
+        .join("\n");
+      filename = "kelompok_umur_overview.csv";
+    } else {
+      csvContent = "Kode Wilayah,Nama Wilayah,Laki-laki,Perempuan,Total\n";
+      csvContent += data
+        .map(
+          (item) =>
+            `"${item.kode_wilayah}","${item.nama_wilayah}",${
+              item.laki_laki || 0
+            },${item.perempuan || 0},${item.total || 0}`
+        )
+        .join("\n");
+      filename = `kelompok_umur_${this.currentTab}.csv`;
+    }
+
+    this.downloadCSV(csvContent, filename);
+  }
+
+  downloadCSV(content, filename) {
+    const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+
+  formatNumber(num) {
+    if (num === null || num === undefined || num === "") return "0";
+    return parseInt(num).toLocaleString("id-ID");
+  }
+
+  showError(message) {
+    const containers = [
+      "overview-table",
+      "balita-table",
+      "anak-table",
+      "dewasa-table",
+      "lansia-table",
+    ];
+
+    containers.forEach((containerId) => {
+      const container = document.getElementById(containerId);
+      if (container) {
+        container.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>${message}</p>
+                        <button onclick="location.reload()" class="btn btn-primary">
+                            <i class="fas fa-refresh"></i> Muat Ulang
+                        </button>
+                    </div>
+                `;
       }
     });
   }
 
-  generatePagination(totalItems) {
-    const totalPages = Math.ceil(totalItems / this.itemsPerPage);
-    const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
-    const endItem = Math.min(this.currentPage * this.itemsPerPage, totalItems);
-
-    let paginationHTML = `
-            <div class="table-pagination">
-                <div class="pagination-info">
-                    Menampilkan ${startItem}-${endItem} dari ${totalItems} data
-                </div>
-                <div class="pagination-controls">
-                    <button class="pagination-btn" ${
-                      this.currentPage === 1 ? "disabled" : ""
-                    } onclick="window.kelompokUmurDashboard.changePage(${
-      this.currentPage - 1
-    })">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-        `;
-
-    // Page numbers
-    for (
-      let i = Math.max(1, this.currentPage - 2);
-      i <= Math.min(totalPages, this.currentPage + 2);
-      i++
-    ) {
-      paginationHTML += `
-                <button class="pagination-btn ${
-                  i === this.currentPage ? "active" : ""
-                }" onclick="window.kelompokUmurDashboard.changePage(${i})">
-                    ${i}
-                </button>
-            `;
-    }
-
-    paginationHTML += `
-                    <button class="pagination-btn" ${
-                      this.currentPage === totalPages ? "disabled" : ""
-                    } onclick="window.kelompokUmurDashboard.changePage(${
-      this.currentPage + 1
-    })">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
+  getEmptyStateHTML() {
+    return `
+            <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <h3>Tidak Ada Data</h3>
+                <p>Belum ada data kelompok umur untuk ditampilkan</p>
             </div>
         `;
-
-    return paginationHTML;
   }
 
-  changePage(page) {
-    this.currentPage = page;
-    this.renderCurrentTab();
-  }
-
-  getAgeGroupLabel(ageGroup) {
-    const labels = {
-      balita: "Balita (0-4)",
-      anak: "Anak (5-14)",
-      dewasa: "Dewasa (15-59)",
-      lansia: "Lansia (60+)",
+  // Utility method to get age group display name
+  getAgeGroupDisplayName(tab) {
+    const names = {
+      overview: "Semua Kelompok Umur",
+      balita: "Balita (0-4 tahun)",
+      anak: "Anak (5-17 tahun)",
+      dewasa: "Dewasa (18-59 tahun)",
+      lansia: "Lansia (60+ tahun)",
     };
-    return labels[ageGroup] || ageGroup;
+    return names[tab] || tab;
   }
 
-  getPercentageClass(percentage) {
-    if (percentage >= 15) return "percentage-high";
-    if (percentage >= 10) return "percentage-medium";
-    return "percentage-low";
-  }
-
-  adjustColor(color, amount) {
-    // Simple color adjustment function
-    const num = parseInt(color.replace("#", ""), 16);
-    const amt = Math.round(2.55 * amount);
-    const R = (num >> 16) + amt;
-    const G = ((num >> 8) & 0x00ff) + amt;
-    const B = (num & 0x0000ff) + amt;
-    return (
-      "#" +
-      (
-        0x1000000 +
-        (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
-        (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
-        (B < 255 ? (B < 1 ? 0 : B) : 255)
-      )
-        .toString(16)
-        .slice(1)
-    );
-  }
-
-  formatNumber(number) {
-    if (number === null || number === undefined) return "-";
-    return new Intl.NumberFormat("id-ID").format(number);
-  }
-
-  async exportData() {
-    try {
-      let dataToExport = [];
-      let filename = "kelompok_umur_";
-
-      if (this.currentTab === "overview") {
-        // Export comprehensive overview data
-        dataToExport = [
-          [
-            "Kode Wilayah",
-            "Wilayah",
-            "Balita (0-4)",
-            "Anak (5-14)",
-            "Dewasa (15-59)",
-            "Lansia (60+)",
-            "Total",
-          ],
-          [
-            "11.00",
-            "ACEH",
-            "25,837",
-            "70,203",
-            "275,633",
-            "108,176",
-            "479,851",
-          ],
-          [
-            "11.01",
-            "ACEH SELATAN",
-            "1,200",
-            "3,200",
-            "12,000",
-            "4,500",
-            "20,900",
-          ],
-          [
-            "11.02",
-            "ACEH TENGGARA",
-            "950",
-            "2,800",
-            "11,000",
-            "4,200",
-            "18,950",
-          ],
-          [
-            "11.03",
-            "ACEH TIMUR",
-            "1,100",
-            "3,100",
-            "10,500",
-            "3,800",
-            "18,500",
-          ],
-          ["11.04", "ACEH TENGAH", "800", "2,500", "9,500", "3,500", "16,300"],
-          ["11.05", "ACEH BARAT", "750", "2,200", "9,000", "3,200", "15,150"],
-        ];
-        filename += "overview";
-      } else {
-        // Export specific age group data
-        dataToExport = [
-          [
-            "Kode Wilayah",
-            "Wilayah",
-            `Jumlah ${this.getAgeGroupLabel(this.currentTab)}`,
-            "Persentase",
-          ],
-        ];
-
-        const tableData = this.generateTableData(this.currentTab);
-        tableData.forEach((row) => {
-          const percentage = ((row.value / row.total) * 100).toFixed(1);
-          dataToExport.push([
-            row.kode,
-            row.wilayah,
-            this.formatNumber(row.value),
-            `${percentage}%`,
-          ]);
-        });
-        filename += this.currentTab;
-      }
-
-      // Convert to CSV
-      const csv = dataToExport
-        .map((row) => row.map((cell) => `"${cell}"`).join(","))
-        .join("\n");
-
-      // Download
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `${filename}_${
-        new Date().toISOString().split("T")[0]
-      }.csv`;
-      link.click();
-    } catch (error) {
-      console.error("Error exporting data:", error);
-      alert("Gagal mengekspor data. Silakan coba lagi.");
-    }
-  }
-
-  // Utility method to show loading state for charts
-  showChartLoading(chartId) {
-    const canvas = document.getElementById(chartId);
-    if (canvas) {
-      const container = canvas.parentElement;
-      container.innerHTML = `
-                <div class="chart-loading">
-                    <div class="loading-spinner"></div>
-                    <span>Memuat grafik...</span>
-                </div>
-            `;
-    }
-  }
-
-  // Method to handle responsive chart updates
+  // Method to handle window resize for chart responsiveness
   handleResize() {
-    Object.values(this.charts).forEach((chart) => {
-      if (chart && typeof chart.resize === "function") {
-        chart.resize();
+    Object.keys(this.charts).forEach((chartKey) => {
+      if (this.charts[chartKey]) {
+        this.charts[chartKey].resize();
       }
     });
   }
 
-  // Clean up method
+  // Cleanup method
   destroy() {
-    // Destroy all charts
-    Object.values(this.charts).forEach((chart) => {
-      if (chart && typeof chart.destroy === "function") {
-        chart.destroy();
+    Object.keys(this.charts).forEach((chartKey) => {
+      if (this.charts[chartKey]) {
+        this.charts[chartKey].destroy();
       }
     });
-    this.charts = {};
 
-    // Remove event listeners
     window.removeEventListener("resize", this.handleResize.bind(this));
   }
 }
 
 // Initialize dashboard when DOM is loaded
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function () {
   window.kelompokUmurDashboard = new KelompokUmurDashboard();
 
-  // Handle window resize for responsive charts
-  window.addEventListener("resize", () => {
+  // Handle window resize for chart responsiveness
+  window.addEventListener("resize", function () {
     if (window.kelompokUmurDashboard) {
       window.kelompokUmurDashboard.handleResize();
     }
   });
 });
 
-// Cleanup when page is unloaded
-window.addEventListener("beforeunload", () => {
+// Cleanup when page unloads
+window.addEventListener("beforeunload", function () {
   if (window.kelompokUmurDashboard) {
     window.kelompokUmurDashboard.destroy();
   }
