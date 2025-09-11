@@ -20,32 +20,32 @@
     <div class="main-content">
         <!-- Page Header -->
         <div class="page-header">
-            <h1>Data Kelompok Umur</h1>
-            <p>Distribusi penduduk berdasarkan kelompok umur dan wilayah</p>
+            <h1>Data Kelompok Umur Penduduk</h1>
+            <p>Distribusi penduduk berdasarkan kelompok umur balita, anak, dewasa, dan lansia</p>
         </div>
 
         <!-- Overall Stats Cards -->
         <div class="stats-grid">
             <div class="stat-card balita">
-                <h3>Total Balita (0-4)</h3>
+                <h3>Total Balita</h3>
                 <div class="value" id="statBalita">
                     <div class="loading-spinner"></div>
                 </div>
             </div>
             <div class="stat-card anak">
-                <h3>Total Anak (5-14)</h3>
+                <h3>Total Anak</h3>
                 <div class="value" id="statAnak">
                     <div class="loading-spinner"></div>
                 </div>
             </div>
             <div class="stat-card dewasa">
-                <h3>Total Dewasa (15-59)</h3>
+                <h3>Total Dewasa</h3>
                 <div class="value" id="statDewasa">
                     <div class="loading-spinner"></div>
                 </div>
             </div>
             <div class="stat-card lansia">
-                <h3>Total Lansia (60+)</h3>
+                <h3>Total Lansia</h3>
                 <div class="value" id="statLansia">
                     <div class="loading-spinner"></div>
                 </div>
@@ -67,65 +67,45 @@
                 </button>
                 <button class="tab-button" data-tab="balita">
                     <i class="fas fa-baby"></i>
-                    Balita (0-4)
+                    Balita (0-4 tahun)
                 </button>
                 <button class="tab-button" data-tab="anak">
                     <i class="fas fa-child"></i>
-                    Anak (5-14)
+                    Anak (5-17 tahun)
                 </button>
                 <button class="tab-button" data-tab="dewasa">
                     <i class="fas fa-user"></i>
-                    Dewasa (15-59)
+                    Dewasa (18-59 tahun)
                 </button>
                 <button class="tab-button" data-tab="lansia">
-                    <i class="fas fa-walking-cane"></i>
-                    Lansia (60+)
+                    <i class="fas fa-user-friends"></i>
+                    Lansia (60+ tahun)
                 </button>
             </div>
 
             <!-- Overview Tab Content -->
             <div id="overview-content" class="tab-content active">
-                <!-- Detail Kelompok Umur Stats -->
-                <div class="detail-stats-grid">
-                    <div class="detail-stat-card">
-                        <h4>0-4 Tahun</h4>
-                        <div class="stat-value">25,837</div>
-                        <div class="stat-percentage">5.4%</div>
-                    </div>
-                    <div class="detail-stat-card">
-                        <h4>5-9 Tahun</h4>
-                        <div class="stat-value">34,349</div>
-                        <div class="stat-percentage">7.2%</div>
-                    </div>
-                    <div class="detail-stat-card">
-                        <h4>10-14 Tahun</h4>
-                        <div class="stat-value">35,853</div>
-                        <div class="stat-percentage">7.5%</div>
-                    </div>
-                    <div class="detail-stat-card">
-                        <h4>15-19 Tahun</h4>
-                        <div class="stat-value">32,412</div>
-                        <div class="stat-percentage">6.8%</div>
-                    </div>
+                <!-- Stats for this tab -->
+                <div class="stats-grid" id="overview-stats">
+                    <!-- Stats will be populated by JavaScript -->
                 </div>
 
-                <!-- Overview Charts -->
-                <div class="overview-chart-container">
+                <div class="kelompok-umur-chart-container">
                     <div class="comparison-chart">
-                        <h3>Distribusi Kelompok Umur</h3>
-                        <div class="chart-container">
-                            <canvas id="overview-pie-chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="comparison-chart">
-                        <h3>Perbandingan Kelompok Umur per Wilayah</h3>
+                        <h3>Distribusi Kelompok Umur per Wilayah</h3>
                         <div class="chart-container">
                             <canvas id="overview-bar-chart"></canvas>
                         </div>
                     </div>
+                    <div class="comparison-chart">
+                        <h3>Proporsi Kelompok Umur</h3>
+                        <div class="chart-container">
+                            <canvas id="overview-pie-chart"></canvas>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Overview Table -->
+                <!-- Data Table -->
                 <div class="data-table-container">
                     <div class="table-controls-header">
                         <div class="search-container">
@@ -139,12 +119,16 @@
                                 <option value="kode_desc">Kode Wilayah Z-A</option>
                                 <option value="wilayah_asc">Wilayah A-Z</option>
                                 <option value="wilayah_desc">Wilayah Z-A</option>
+                                <option value="balita_desc">Balita Tertinggi</option>
+                                <option value="balita_asc">Balita Terendah</option>
+                                <option value="anak_desc">Anak Tertinggi</option>
+                                <option value="anak_asc">Anak Terendah</option>
+                                <option value="dewasa_desc">Dewasa Tertinggi</option>
+                                <option value="dewasa_asc">Dewasa Terendah</option>
+                                <option value="lansia_desc">Lansia Tertinggi</option>
+                                <option value="lansia_asc">Lansia Terendah</option>
                                 <option value="total_desc">Total Tertinggi</option>
                                 <option value="total_asc">Total Terendah</option>
-                                <option value="balita_desc">Balita Tertinggi</option>
-                                <option value="anak_desc">Anak Tertinggi</option>
-                                <option value="dewasa_desc">Dewasa Tertinggi</option>
-                                <option value="lansia_desc">Lansia Tertinggi</option>
                             </select>
                         </div>
                         <div class="export-controls">
@@ -166,25 +150,27 @@
 
             <!-- Balita Tab Content -->
             <div id="balita-content" class="tab-content">
+                <!-- Stats for this tab -->
                 <div class="stats-grid" id="balita-stats">
                     <!-- Stats will be populated by JavaScript -->
                 </div>
 
-                <div class="kelompok-chart-container">
+                <div class="kelompok-umur-chart-container">
                     <div class="comparison-chart">
-                        <h3>Distribusi Balita (0-4) per Wilayah</h3>
+                        <h3>Distribusi Balita per Wilayah</h3>
                         <div class="chart-container">
                             <canvas id="balita-bar-chart"></canvas>
                         </div>
                     </div>
                     <div class="comparison-chart">
-                        <h3>Proporsi Balita per Wilayah</h3>
+                        <h3>Proporsi Balita Berdasarkan Jenis Kelamin</h3>
                         <div class="chart-container">
                             <canvas id="balita-pie-chart"></canvas>
                         </div>
                     </div>
                 </div>
 
+                <!-- Data Table -->
                 <div class="data-table-container">
                     <div class="table-controls-header">
                         <div class="search-container">
@@ -198,10 +184,12 @@
                                 <option value="kode_desc">Kode Wilayah Z-A</option>
                                 <option value="wilayah_asc">Wilayah A-Z</option>
                                 <option value="wilayah_desc">Wilayah Z-A</option>
-                                <option value="balita_desc">Jumlah Balita Tertinggi</option>
-                                <option value="balita_asc">Jumlah Balita Terendah</option>
-                                <option value="persentase_desc">Persentase Tertinggi</option>
-                                <option value="persentase_asc">Persentase Terendah</option>
+                                <option value="laki_laki_desc">Laki-laki Tertinggi</option>
+                                <option value="laki_laki_asc">Laki-laki Terendah</option>
+                                <option value="perempuan_desc">Perempuan Tertinggi</option>
+                                <option value="perempuan_asc">Perempuan Terendah</option>
+                                <option value="total_desc">Total Tertinggi</option>
+                                <option value="total_asc">Total Terendah</option>
                             </select>
                         </div>
                         <div class="export-controls">
@@ -223,25 +211,27 @@
 
             <!-- Anak Tab Content -->
             <div id="anak-content" class="tab-content">
+                <!-- Stats for this tab -->
                 <div class="stats-grid" id="anak-stats">
                     <!-- Stats will be populated by JavaScript -->
                 </div>
 
-                <div class="kelompok-chart-container">
+                <div class="kelompok-umur-chart-container">
                     <div class="comparison-chart">
-                        <h3>Distribusi Anak (5-14) per Wilayah</h3>
+                        <h3>Distribusi Anak per Wilayah</h3>
                         <div class="chart-container">
                             <canvas id="anak-bar-chart"></canvas>
                         </div>
                     </div>
                     <div class="comparison-chart">
-                        <h3>Proporsi Anak per Wilayah</h3>
+                        <h3>Proporsi Anak Berdasarkan Jenis Kelamin</h3>
                         <div class="chart-container">
                             <canvas id="anak-pie-chart"></canvas>
                         </div>
                     </div>
                 </div>
 
+                <!-- Data Table -->
                 <div class="data-table-container">
                     <div class="table-controls-header">
                         <div class="search-container">
@@ -255,10 +245,12 @@
                                 <option value="kode_desc">Kode Wilayah Z-A</option>
                                 <option value="wilayah_asc">Wilayah A-Z</option>
                                 <option value="wilayah_desc">Wilayah Z-A</option>
-                                <option value="anak_desc">Jumlah Anak Tertinggi</option>
-                                <option value="anak_asc">Jumlah Anak Terendah</option>
-                                <option value="persentase_desc">Persentase Tertinggi</option>
-                                <option value="persentase_asc">Persentase Terendah</option>
+                                <option value="laki_laki_desc">Laki-laki Tertinggi</option>
+                                <option value="laki_laki_asc">Laki-laki Terendah</option>
+                                <option value="perempuan_desc">Perempuan Tertinggi</option>
+                                <option value="perempuan_asc">Perempuan Terendah</option>
+                                <option value="total_desc">Total Tertinggi</option>
+                                <option value="total_asc">Total Terendah</option>
                             </select>
                         </div>
                         <div class="export-controls">
@@ -280,25 +272,27 @@
 
             <!-- Dewasa Tab Content -->
             <div id="dewasa-content" class="tab-content">
+                <!-- Stats for this tab -->
                 <div class="stats-grid" id="dewasa-stats">
                     <!-- Stats will be populated by JavaScript -->
                 </div>
 
-                <div class="kelompok-chart-container">
+                <div class="kelompok-umur-chart-container">
                     <div class="comparison-chart">
-                        <h3>Distribusi Dewasa (15-59) per Wilayah</h3>
+                        <h3>Distribusi Dewasa per Wilayah</h3>
                         <div class="chart-container">
                             <canvas id="dewasa-bar-chart"></canvas>
                         </div>
                     </div>
                     <div class="comparison-chart">
-                        <h3>Proporsi Dewasa per Wilayah</h3>
+                        <h3>Proporsi Dewasa Berdasarkan Jenis Kelamin</h3>
                         <div class="chart-container">
                             <canvas id="dewasa-pie-chart"></canvas>
                         </div>
                     </div>
                 </div>
 
+                <!-- Data Table -->
                 <div class="data-table-container">
                     <div class="table-controls-header">
                         <div class="search-container">
@@ -312,10 +306,12 @@
                                 <option value="kode_desc">Kode Wilayah Z-A</option>
                                 <option value="wilayah_asc">Wilayah A-Z</option>
                                 <option value="wilayah_desc">Wilayah Z-A</option>
-                                <option value="dewasa_desc">Jumlah Dewasa Tertinggi</option>
-                                <option value="dewasa_asc">Jumlah Dewasa Terendah</option>
-                                <option value="persentase_desc">Persentase Tertinggi</option>
-                                <option value="persentase_asc">Persentase Terendah</option>
+                                <option value="laki_laki_desc">Laki-laki Tertinggi</option>
+                                <option value="laki_laki_asc">Laki-laki Terendah</option>
+                                <option value="perempuan_desc">Perempuan Tertinggi</option>
+                                <option value="perempuan_asc">Perempuan Terendah</option>
+                                <option value="total_desc">Total Tertinggi</option>
+                                <option value="total_asc">Total Terendah</option>
                             </select>
                         </div>
                         <div class="export-controls">
@@ -337,25 +333,27 @@
 
             <!-- Lansia Tab Content -->
             <div id="lansia-content" class="tab-content">
+                <!-- Stats for this tab -->
                 <div class="stats-grid" id="lansia-stats">
                     <!-- Stats will be populated by JavaScript -->
                 </div>
 
-                <div class="kelompok-chart-container">
+                <div class="kelompok-umur-chart-container">
                     <div class="comparison-chart">
-                        <h3>Distribusi Lansia (60+) per Wilayah</h3>
+                        <h3>Distribusi Lansia per Wilayah</h3>
                         <div class="chart-container">
                             <canvas id="lansia-bar-chart"></canvas>
                         </div>
                     </div>
                     <div class="comparison-chart">
-                        <h3>Proporsi Lansia per Wilayah</h3>
+                        <h3>Proporsi Lansia Berdasarkan Jenis Kelamin</h3>
                         <div class="chart-container">
                             <canvas id="lansia-pie-chart"></canvas>
                         </div>
                     </div>
                 </div>
 
+                <!-- Data Table -->
                 <div class="data-table-container">
                     <div class="table-controls-header">
                         <div class="search-container">
@@ -369,10 +367,12 @@
                                 <option value="kode_desc">Kode Wilayah Z-A</option>
                                 <option value="wilayah_asc">Wilayah A-Z</option>
                                 <option value="wilayah_desc">Wilayah Z-A</option>
-                                <option value="lansia_desc">Jumlah Lansia Tertinggi</option>
-                                <option value="lansia_asc">Jumlah Lansia Terendah</option>
-                                <option value="persentase_desc">Persentase Tertinggi</option>
-                                <option value="persentase_asc">Persentase Terendah</option>
+                                <option value="laki_laki_desc">Laki-laki Tertinggi</option>
+                                <option value="laki_laki_asc">Laki-laki Terendah</option>
+                                <option value="perempuan_desc">Perempuan Tertinggi</option>
+                                <option value="perempuan_asc">Perempuan Terendah</option>
+                                <option value="total_desc">Total Tertinggi</option>
+                                <option value="total_asc">Total Terendah</option>
                             </select>
                         </div>
                         <div class="export-controls">
