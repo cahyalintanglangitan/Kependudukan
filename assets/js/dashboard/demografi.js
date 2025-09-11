@@ -297,8 +297,7 @@ class DemografiDashboard {
                     },
                     plugins: {
                         legend: { 
-                            display: true,
-                            position: 'top'
+                            display: false,
                         },
                         tooltip: {
                             ...window.DashboardCommon.chartDefaults.plugins.tooltip,
@@ -366,13 +365,7 @@ class DemografiDashboard {
                     ...window.DashboardCommon.chartDefaults,
                     plugins: {
                         legend: {
-                            position: 'bottom',
-                            labels: {
-                                usePointStyle: true,
-                                pointStyle: 'circle',
-                                font: { size: 12 },
-                                padding: 15
-                            }
+                            display: false
                         },
                         tooltip: {
                             ...window.DashboardCommon.chartDefaults.plugins.tooltip,
