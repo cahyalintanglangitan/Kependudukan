@@ -34,9 +34,9 @@
 }
 
 /* Special animations for demografi data */
-.demografi-page .stat-card .value {
+/* .demografi-page .stat-card .value {
     animation: countUp 1.5s ease-out;
-}
+} */
 
 @keyframes countUp {
     from {
