@@ -1,4 +1,5 @@
 // assets/js/api.js - API handling utilities
+// Versi Lengkap dan Sudah Diperbaiki
 
 /**
  * API Handler Class
@@ -153,59 +154,65 @@ class APIHandler {
         return this.get('disabilitas.php', filters);
     }
 
-    async getAktaCeraiData(filters = {}) {
-        return this.get('akta/cerai.php', filters);
+    // --- MULAI BLOK YANG DIPERBAIKI ---
+    async getKelompokUmurOverview(filters = {}) {
+        return this.get('kelompok_umur.php?endpoint=overview', filters);
     }
 
-    async getAktaLahirData(filters = {}) {
-        return this.get('akta/lahir.php', filters);
+    async getKelompokUmurBalita(filters = {}) {
+        return this.get('kelompok_umur.php?endpoint=balita', filters);
     }
 
-    async getAktaMatiData(filters = {}) {
-        return this.get('akta/mati.php', filters);
+    async getKelompokUmurAnak(filters = {}) {
+        return this.get('kelompok_umur.php?endpoint=anak', filters);
     }
-
-    async getDemografiData(filters = {}) {
-        return this.get('demografi.php', filters);
+    
+    async getKelompokUmurDewasa(filters = {}) {
+        return this.get('kelompok_umur.php?endpoint=dewasa', filters);
     }
-
-    async getKelompokUmurData(filters = {}) {
-        return this.get('kelompok_umur.php', filters);
+    
+    async getKelompokUmurLansia(filters = {}) {
+        return this.get('kelompok_umur.php?endpoint=lansia', filters);
     }
+    // --- AKHIR BLOK YANG DIPERBAIKI ---
 
     async getKepalaKeluargaData(filters = {}) {
         return this.get('kepala_keluarga.php', filters);
     }
+    
+    async getDemografiData(filters = {}) {
+        return this.get('demografi.php', filters);
+    }
 
     async getAktaKelahiranData(filters = {}) {
-    const defaultFilters = {
-        region_type: 'all',
-        province: 'all', 
-        sort_by: 'total_desc',
-        limit: 20
-    };
-    return this.get('akta.php', { ...defaultFilters, ...filters });
-}
+        const defaultFilters = {
+            region_type: 'all',
+            province: 'all', 
+            sort_by: 'total_desc',
+            limit: 20
+        };
+        return this.get('akta.php', { ...defaultFilters, ...filters });
+    }
 
-async getPendidikanData(filters = {}) {
-    const defaultFilters = {
-        region_type: 'all',
-        province: 'all',
-        sort_by: 'total_desc',
-        limit: 20
-    };
-    return this.get('pendidikan.php', { ...defaultFilters, ...filters });
-}
+    async getPendidikanData(filters = {}) {
+        const defaultFilters = {
+            region_type: 'all',
+            province: 'all',
+            sort_by: 'total_desc',
+            limit: 20
+        };
+        return this.get('pendidikan.php', { ...defaultFilters, ...filters });
+    }
 
-async getPekerjaanData(filters = {}) {
-    const defaultFilters = {
-        region_type: 'all',
-        province: 'all',
-        sort_by: 'total_desc',
-        limit: 20
-    };
-    return this.get('pekerjaan.php', { ...defaultFilters, ...filters });
-}
+    async getPekerjaanData(filters = {}) {
+        const defaultFilters = {
+            region_type: 'all',
+            province: 'all',
+            sort_by: 'total_desc',
+            limit: 20
+        };
+        return this.get('pekerjaan.php', { ...defaultFilters, ...filters });
+    }
 }
 
 // Global API instance

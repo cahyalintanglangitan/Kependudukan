@@ -1,4 +1,5 @@
 // assets/js/dashboard/kelompok_umur.js
+// Versi Lengkap dan Sudah Diperbaiki
 
 class KelompokUmurDashboard {
   constructor() {
@@ -73,7 +74,7 @@ class KelompokUmurDashboard {
 
   async loadOverviewData() {
     try {
-      const response = await window.api.get("kelompok_umur/overview");
+      const response = await window.API.getKelompokUmurOverview();
       this.data.overview = response.data || [];
       this.filteredData.overview = [...this.data.overview];
     } catch (error) {
@@ -85,7 +86,7 @@ class KelompokUmurDashboard {
 
   async loadBalitaData() {
     try {
-      const response = await window.api.get("kelompok_umur/balita");
+      const response = await window.API.getKelompokUmurBalita();
       this.data.balita = response.data || [];
       this.filteredData.balita = [...this.data.balita];
     } catch (error) {
@@ -97,7 +98,7 @@ class KelompokUmurDashboard {
 
   async loadAnakData() {
     try {
-      const response = await window.api.get("kelompok_umur/anak");
+      const response = await window.API.getKelompokUmurAnak();
       this.data.anak = response.data || [];
       this.filteredData.anak = [...this.data.anak];
     } catch (error) {
@@ -109,7 +110,7 @@ class KelompokUmurDashboard {
 
   async loadDewasaData() {
     try {
-      const response = await window.api.get("kelompok_umur/dewasa");
+      const response = await window.API.getKelompokUmurDewasa();
       this.data.dewasa = response.data || [];
       this.filteredData.dewasa = [...this.data.dewasa];
     } catch (error) {
@@ -121,7 +122,7 @@ class KelompokUmurDashboard {
 
   async loadLansiaData() {
     try {
-      const response = await window.api.get("kelompok_umur/lansia");
+      const response = await window.API.getKelompokUmurLansia();
       this.data.lansia = response.data || [];
       this.filteredData.lansia = [...this.data.lansia];
     } catch (error) {
@@ -130,6 +131,7 @@ class KelompokUmurDashboard {
       this.filteredData.lansia = [];
     }
   }
+
 
   updateOverallStats() {
     const stats = this.calculateOverallStats();
@@ -422,7 +424,7 @@ class KelompokUmurDashboard {
             {
               label: `Total ${this.getAgeGroupName(tab)}`,
               data: data.map((item) => parseInt(item.total) || 0),
-              backgroundColor: this.colors[tab],
+              backgroundColor: this.colors[tab] || this.colors.total,
               borderWidth: 1,
             },
           ],
@@ -689,7 +691,7 @@ class KelompokUmurDashboard {
           (item.nama_wilayah &&
             item.nama_wilayah.toLowerCase().includes(searchTerm)) ||
           (item.kode_wilayah &&
-            item.kode_wilayah.toLowerCase().includes(searchTerm))
+            item.kode_wilayah.toString().toLowerCase().includes(searchTerm))
       );
     }
 
@@ -746,7 +748,8 @@ class KelompokUmurDashboard {
       if (tab === "overview") {
         await this.loadOverviewData();
       } else {
-        await this[`load${tab.charAt(0).toUpperCase() + tab.slice(1)}Data`]();
+        const capitalizedTab = tab.charAt(0).toUpperCase() + tab.slice(1);
+        await this[`load${capitalizedTab}Data`]();
       }
 
       // Reset search and sort
@@ -755,9 +758,9 @@ class KelompokUmurDashboard {
 
       if (searchInput) searchInput.value = "";
       if (sortSelect) sortSelect.value = "kode_asc";
-
-      this.renderCurrentTab();
-
+      
+      this.handleSearch(tab); // Re-apply filter and sort
+      
       if (tab === "overview") {
         this.updateOverallStats();
       }
