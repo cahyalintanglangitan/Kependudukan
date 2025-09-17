@@ -71,16 +71,16 @@ try {
     // Enhanced sorting options
  switch ($sort_by) {
         case 'total_asc':
-            $sql .= " ORDER BY TOTAL ASC";
+            $sql .= " ORDER BY JUMLAH ASC";
             break;
         case 'total_desc':
-            $sql .= " ORDER BY TOTAL DESC";
+            $sql .= " ORDER BY JUMLAH DESC";
             break;
         case 'laki_desc':
-            $sql .= " ORDER BY `LAKI-LAKI` DESC";
+            $sql .= " ORDER BY `LAKI_LAKI` DESC";
             break;
         case 'laki_asc':
-            $sql .= " ORDER BY `LAKI-LAKI` ASC";
+            $sql .= " ORDER BY `LAKI_LAKI` ASC";
             break;
         case 'perempuan_desc':
             $sql .= " ORDER BY PEREMPUAN DESC";
@@ -95,7 +95,7 @@ try {
             $sql .= " ORDER BY WILAYAH DESC";
             break;
         default:
-            $sql .= " ORDER BY TOTAL DESC";
+            $sql .= " ORDER BY JUMLAH DESC";
     }
     
     // Execute query
