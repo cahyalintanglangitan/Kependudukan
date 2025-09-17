@@ -51,10 +51,10 @@ $menu_items = [
 
         <div class="nav-section">
             <h4 class="section-title">Tools</h4>
-            <a href="#" id="nav-ai" class="nav-link ai-link">
+            <!-- Updated AI Assistant link to point to actual page -->
+            <a href="../dashboard/ai_assistant.php" id="nav-ai" class="nav-link ai-link <?php echo $current_file === 'ai_assistant' ? 'active' : ''; ?>">
                 <i class="fas fa-robot"></i>
                 <span>AI Assistant</span>
-                <span class="soon">Soon</span>
             </a>
         </div>
     </nav>
@@ -198,30 +198,3 @@ $menu_items = [
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    document.getElementById('nav-ai').addEventListener('click', function(event) {
-        // Mencegah link berpindah halaman
-        event.preventDefault();
-
-        // Menampilkan popup SweetAlert
-        Swal.fire({
-            icon: 'info',
-            title: 'Fitur Segera Hadir',
-            html: 'Fitur <b>AI Assistant</b> sedang dalam tahap pengembangan. <br>Nantikan pembaruan selanjutnya!',
-            confirmButtonText: 'Mengerti',
-            customClass: {
-                title: 'swal-title',
-                popup: 'swal-popup'
-            }
-        });
-    });
-</script>
-
-<style>
-    .swal-title {
-        font-size: 1.5rem !important;
-    }
-    .swal-popup {
-        border-radius: 15px !important;
-    }
-</style>
