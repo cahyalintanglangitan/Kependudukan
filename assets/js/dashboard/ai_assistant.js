@@ -285,53 +285,53 @@ class AIAssistant {
 
     // Enhanced analytical responses for population data
     if (message.includes("analisis") && message.includes("akta cerai")) {
-      return "📊 **Analisis Akta Cerai Komprehensif:**\n\n• **Wilayah Tertinggi**: Daerah urban menunjukkan tingkat perceraian 15-20% lebih tinggi\n• **Faktor Korelasi**: Tingkat pendidikan dan ekonomi berpengaruh signifikan\n• **Tren Temporal**: Peningkatan 8% dalam 3 tahun terakhir\n• **Rekomendasi**: Perlunya program konseling keluarga di area high-risk\n\nApakah Anda ingin drill-down ke wilayah spesifik?"
+      return "Analisis Akta Cerai Komprehensif:\n\nWilayah Tertinggi: Daerah urban menunjukkan tingkat perceraian 15-20% lebih tinggi\nFaktor Korelasi: Tingkat pendidikan dan ekonomi berpengaruh signifikan\nTren Temporal: Peningkatan 8% dalam 3 tahun terakhir\nRekomendasi: Perlunya program konseling keluarga di area high-risk\n\nApakah Anda ingin drill-down ke wilayah spesifik?"
     }
 
     if (message.includes("bandingkan") && message.includes("disabilitas")) {
-      return "🔍 **Komparasi Disabilitas Fisik vs Mental:**\n\n• **Disabilitas Fisik**: 128.428 kasus (22.1% total)\n• **Disabilitas Mental**: 224.768 kasus (38.8% total)\n• **Rasio**: 1:1.75 (Mental lebih dominan)\n• **Distribusi Geografis**: Mental tinggi di urban, fisik di rural\n• **Implikasi**: Kebutuhan layanan psikososial lebih mendesak\n\nPerlu analisis lebih detail per kabupaten/kota?"
+      return "Komparasi Disabilitas Fisik vs Mental:\n\nDisabilitas Fisik: 128.428 kasus (22.1% total)\nDisabilitas Mental: 224.768 kasus (38.8% total)\nRasio: 1:1.75 (Mental lebih dominan)\nDistribusi Geografis: Mental tinggi di urban, fisik di rural\nImplikasi: Kebutuhan layanan psikososial lebih mendesak\n\nPerlu analisis lebih detail per kabupaten/kota?"
     }
 
     if (message.includes("korelasi") && message.includes("gender")) {
-      return "📈 **Analisis Korelasi Gender-Ekonomi:**\n\n• **Kepala Keluarga Perempuan**: 37.999.780 (20.3%)\n• **Korelasi Ekonomi**: Wilayah dengan KK perempuan tinggi = ekonomi menengah ke bawah\n• **Faktor Pendorong**: Migrasi laki-laki, perceraian, kemandirian ekonomi\n• **Dampak Sosial**: Perubahan pola konsumsi dan investasi pendidikan\n\nIngin melihat breakdown per sektor ekonomi?"
+      return "Analisis Korelasi Gender-Ekonomi:\n\nKepala Keluarga Perempuan: 37.999.780 (20.3%)\nKorelasi Ekonomi: Wilayah dengan KK perempuan tinggi = ekonomi menengah ke bawah\nFaktor Pendorong: Migrasi laki-laki, perceraian, kemandirian ekonomi\nDampak Sosial: Perubahan pola konsumsi dan investasi pendidikan\n\nIngin melihat breakdown per sektor ekonomi?"
     }
 
     if (message.includes("proyeksi") && message.includes("lansia")) {
-      return "🏥 **Proyeksi Kebutuhan Fasilitas Lansia:**\n\n• **Populasi 60+**: 64.808.150 jiwa (11.4% total)\n• **Proyeksi 2030**: Peningkatan 40-50% (aging population)\n• **Kebutuhan Fasilitas**: 1 puskesmas lansia per 5.000 lansia\n• **Gap Saat Ini**: Defisit 60% fasilitas kesehatan khusus lansia\n• **Prioritas Wilayah**: Jawa Tengah, Jawa Timur, DIY\n\nPerlu simulasi skenario investasi?"
+      return "Proyeksi Kebutuhan Fasilitas Lansia:\n\nPopulasi 60+: 64.808.150 jiwa (11.4% total)\nProyeksi 2030: Peningkatan 40-50% (aging population)\nKebutuhan Fasilitas: 1 puskesmas lansia per 5.000 lansia\nGap Saat Ini: Defisit 60% fasilitas kesehatan khusus lansia\nPrioritas Wilayah: Jawa Tengah, Jawa Timur, DIY\n\nPerlu simulasi skenario investasi?"
     }
 
     if (message.includes("dependency ratio")) {
-      return "⚖️ **Analisis Dependency Ratio:**\n\n• **Ratio Saat Ini**: 45.2 (per 100 usia produktif)\n• **Komposisi**: 35.1 anak + 10.1 lansia\n• **Tren**: Shifting dari child ke elderly dependency\n• **Implikasi Ekonomi**: Beban fiskal meningkat 25% dalam 10 tahun\n• **Strategi**: Optimalisasi bonus demografis sebelum 2035\n\nIngin analisis per provinsi?"
+      return "Analisis Dependency Ratio:\n\nRatio Saat Ini: 45.2 (per 100 usia produktif)\nKomposisi: 35.1 anak + 10.1 lansia\nTren: Shifting dari child ke elderly dependency\nImplikasi Ekonomi: Beban fiskal meningkat 25% dalam 10 tahun\nStrategi: Optimalisasi bonus demografis sebelum 2035\n\nIngin analisis per provinsi?"
     }
 
     if (message.includes("evaluasi program")) {
-      return "📋 **Evaluasi Program Disabilitas:**\n\n• **Coverage Rate**: 65% penyandang disabilitas terjangkau program\n• **Efektivitas Geografis**: Urban 80%, rural 45%\n• **Gap Layanan**: Disabilitas mental kurang mendapat perhatian\n• **ROI Program**: Setiap Rp 1M investasi = Rp 2.3M benefit ekonomi\n• **Rekomendasi**: Fokus pada mobile services untuk rural area\n\nPerlu detail program spesifik?"
+      return "Evaluasi Program Disabilitas:\n\nCoverage Rate: 65% penyandang disabilitas terjangkau program\nEfektivitas Geografis: Urban 80%, rural 45%\nGap Layanan: Disabilitas mental kurang mendapat perhatian\nROI Program: Setiap Rp 1M investasi = Rp 2.3M benefit ekonomi\nRekomendasi: Fokus pada mobile services untuk rural area\n\nPerlu detail program spesifik?"
     }
 
     if (message.includes("akta")) {
       if (message.includes("lahir")) {
-        return "📋 **Analisis Akta Lahir Mendalam:**\n\nBerdasarkan data komprehensif, tingkat kepemilikan akta lahir menunjukkan variasi signifikan antar wilayah (62-95%). Faktor utama: aksesibilitas layanan, tingkat pendidikan, dan kesadaran hukum. Rekomendasi: program mobile registration dan digitalisasi layanan.\n\n**Insight Kunci**: Korelasi positif antara kepemilikan akta dengan akses pendidikan formal."
+        return "Analisis Akta Lahir Mendalam:\n\nBerdasarkan data komprehensif, tingkat kepemilikan akta lahir menunjukkan variasi signifikan antar wilayah (62-95%). Faktor utama: aksesibilitas layanan, tingkat pendidikan, dan kesadaran hukum. Rekomendasi: program mobile registration dan digitalisasi layanan.\n\nInsight Kunci: Korelasi positif antara kepemilikan akta dengan akses pendidikan formal."
       } else if (message.includes("mati")) {
-        return "⚱️ **Analisis Akta Kematian:**\n\nPola registrasi kematian mencerminkan sistem surveilans demografis. Data menunjukkan under-reporting 15-25% terutama di daerah terpencil. Implikasi: bias dalam perencanaan kesehatan masyarakat dan alokasi sumber daya.\n\n**Rekomendasi**: Integrasi dengan sistem kesehatan dan kerjasama dengan tokoh agama."
+        return "Analisis Akta Kematian:\n\nPola registrasi kematian mencerminkan sistem surveilans demografis. Data menunjukkan under-reporting 15-25% terutama di daerah terpencil. Implikasi: bias dalam perencanaan kesehatan masyarakat dan alokasi sumber daya.\n\nRekomendasi: Integrasi dengan sistem kesehatan dan kerjasama dengan tokoh agama."
       } else {
-        return "📊 **Overview Sistem Akta Kependudukan:**\n\nSistem registrasi vital menunjukkan progress signifikan namun masih ada gap. Akta lahir: 78% coverage, akta mati: 65%, akta cerai: 85%. Digitalisasi meningkatkan efisiensi 40%.\n\n**Strategic Focus**: Standardisasi sistem, capacity building, dan public awareness campaign."
+        return "Overview Sistem Akta Kependudukan:\n\nSistem registrasi vital menunjukkan progress signifikan namun masih ada gap. Akta lahir: 78% coverage, akta mati: 65%, akta cerai: 85%. Digitalisasi meningkatkan efisiensi 40%.\n\nStrategic Focus: Standardisasi sistem, capacity building, dan public awareness campaign."
       }
     }
 
     if (message.includes("disabilitas")) {
-      return "♿ **Deep Dive Analisis Disabilitas:**\n\nData 579.671 penyandang disabilitas menunjukkan kompleksitas kebutuhan layanan. Distribusi: Mental (38.8%), Fisik (22.1%), Rungu/Wicara (15.7%). Tantangan utama: stigma sosial dan aksesibilitas.\n\n**Policy Insight**: Investasi infrastruktur inklusif memberikan multiplier effect pada ekonomi lokal."
+      return "Deep Dive Analisis Disabilitas:\n\nData 579.671 penyandang disabilitas menunjukkan kompleksitas kebutuhan layanan. Distribusi: Mental (38.8%), Fisik (22.1%), Rungu/Wicara (15.7%). Tantangan utama: stigma sosial dan aksesibilitas.\n\nPolicy Insight: Investasi infrastruktur inklusif memberikan multiplier effect pada ekonomi lokal."
     }
 
     if (message.includes("demografi")) {
-      return "🌍 **Analisis Demografis Strategis:**\n\nKomposisi penduduk 284.973.643 jiwa dengan sex ratio 101.9 menunjukkan stabilitas demografis. Window of opportunity: bonus demografis hingga 2035. Tantangan: urbanisasi 4.2% annually dan aging population.\n\n**Strategic Implication**: Perlu rebalancing investasi infrastruktur urban-rural."
+      return "Analisis Demografis Strategis:\n\nKomposisi penduduk 284.973.643 jiwa dengan sex ratio 101.9 menunjukkan stabilitas demografis. Window of opportunity: bonus demografis hingga 2035. Tantangan: urbanisasi 4.2% annually dan aging population.\n\nStrategic Implication: Perlu rebalancing investasi infrastruktur urban-rural."
     }
 
     if (message.includes("kelompok umur")) {
-      return "👥 **Analisis Struktur Usia Populasi:**\n\nPiramida penduduk menunjukkan transisi demografis. Usia produktif (15-64): 68.2% populasi. Dependency ratio: 46.7 per 100 usia produktif. Critical point: 2030-2035 peak productive age.\n\n**Policy Window**: Maksimalkan human capital investment sekarang untuk sustainable growth."
+      return "Analisis Struktur Usia Populasi:\n\nPiramida penduduk menunjukkan transisi demografis. Usia produktif (15-64): 68.2% populasi. Dependency ratio: 46.7 per 100 usia produktif. Critical point: 2030-2035 peak productive age.\n\nPolicy Window: Maksimalkan human capital investment sekarang untuk sustainable growth."
     }
 
     if (message.includes("kepala keluarga")) {
-      return "🏠 **Analisis Dinamika Kepala Keluarga:**\n\nTren kepemimpinan keluarga berubah: KK perempuan meningkat 12% dalam 5 tahun. Faktor: emansipasi, ekonomi, dan perubahan sosial. Implikasi: pola konsumsi, investasi pendidikan, dan decision making berbeda.\n\n**Economic Impact**: Household dengan KK perempuan cenderung prioritaskan pendidikan dan kesehatan."
+      return "Analisis Dinamika Kepala Keluarga:\n\nTren kepemimpinan keluarga berubah: KK perempuan meningkat 12% dalam 5 tahun. Faktor: emansipasi, ekonomi, dan perubahan sosial. Implikasi: pola konsumsi, investasi pendidikan, dan decision making berbeda.\n\nEconomic Impact: Household dengan KK perempuan cenderung prioritaskan pendidikan dan kesehatan."
     }
 
     if (message.includes("halo") || message.includes("hai") || message.includes("hello")) {
@@ -343,7 +343,7 @@ class AIAssistant {
     }
 
     // Default response
-    return "🤖 **AI Assistant Siap Membantu!**\n\nSaya dapat memberikan analisis mendalam untuk:\n• **Akta**: Distribusi, gap coverage, efektivitas program\n• **Demografi**: Bonus demografis, migrasi, proyeksi\n• **Disabilitas**: Mapping kebutuhan, evaluasi program\n• **Kelompok Umur**: Dependency ratio, workforce planning\n• **Kepala Keluarga**: Gender dynamics, economic impact\n\n**Contoh pertanyaan**: 'Analisis korelasi pendidikan dengan kepemilikan akta' atau 'Proyeksi kebutuhan layanan lansia 2030'"
+    return "AI Assistant Siap Membantu!\n\nSaya dapat memberikan analisis mendalam untuk:\n\nAkta: Distribusi, gap coverage, efektivitas program\nDemografi: Bonus demografis, migrasi, proyeksi\nDisabilitas: Mapping kebutuhan, evaluasi program\nKelompok Umur: Dependency ratio, workforce planning\nKepala Keluarga: Gender dynamics, economic impact\n\nContoh pertanyaan: 'Analisis korelasi pendidikan dengan kepemilikan akta' atau 'Proyeksi kebutuhan layanan lansia 2030'"
   }
 
   showTypingIndicator() {
