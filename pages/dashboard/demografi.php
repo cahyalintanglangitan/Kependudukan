@@ -59,6 +59,8 @@
                         <option value="total_asc">Total Populasi (Terendah)</option>
                         <option value="laki_laki_desc">Laki-laki (Tertinggi)</option>
                         <option value="perempuan_desc">Perempuan (Tertinggi)</option>
+                        <option value="laki_asc">Laki-laki (Terendah)</option>
+                        <option value="perempuan_asc">Perempuan (Terendah)</option>
                         <option value="name_asc">Nama Wilayah (A-Z)</option>
                         <option value="name_desc">Nama Wilayah (Z-A)</option>
                     </select>

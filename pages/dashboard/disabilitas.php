@@ -56,11 +56,17 @@
         <option value="name_asc">Nama A-Z</option>
         <option value="name_desc">Nama Z-A</option>
         <option value="fisik_desc">Fisik Tertinggi</option>
+        <option value="fisik_asc">Fisik Terendah</option>
         <option value="netra_desc">Netra Tertinggi</option>
+        <option value="netra_asc">Netra Terendah</option>
         <option value="rungu_desc">Rungu/Wicara Tertinggi</option>
+        <option value="rungu_asc">Rungu/Wicara Terendah</option>
         <option value="mental_desc">Mental Tertinggi</option>
+        <option value="mental_asc">Mental Terendah</option>
         <option value="fisik_mental_desc">Fisik & Mental Tertinggi</option>
+        <option value="fisik_mental_asc">Fisik & Mental Terendah</option>
         <option value="lainnya_desc">Lainnya Tertinggi</option>
+        <option value="lainnya_asc">Lainnya Terendah</option>
     </select>
 </div>
 

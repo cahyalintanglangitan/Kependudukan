@@ -69,7 +69,7 @@ try {
     }
 
     // Enhanced sorting options
-    switch ($sort_by) {
+switch ($sort_by) {
         case 'total_asc':
             $sql .= " ORDER BY TOTAL ASC";
             break;
@@ -85,20 +85,38 @@ try {
         case 'fisik_desc':
             $sql .= " ORDER BY `DISABILITAS FISIK` DESC";
             break;
+        case 'fisik_asc':
+            $sql .= " ORDER BY `DISABILITAS FISIK` ASC";
+            break;
         case 'netra_desc':
             $sql .= " ORDER BY `DISABILITAS NETRA/ BUTA` DESC";
+            break;
+        case 'netra_asc':
+            $sql .= " ORDER BY `DISABILITAS NETRA/ BUTA` ASC";
             break;
         case 'rungu_desc':
             $sql .= " ORDER BY `DISABILITAS RUNGU/ WICARA` DESC";
             break;
+        case 'rungu_asc':
+            $sql .= " ORDER BY `DISABILITAS RUNGU/ WICARA` ASC";
+            break;
         case 'mental_desc':
             $sql .= " ORDER BY `DISABILITAS MENTAL/ JIWA` DESC";
+            break;
+        case 'mental_asc':
+            $sql .= " ORDER BY `DISABILITAS MENTAL/ JIWA` ASC";
             break;
         case 'fisik_mental_desc':
             $sql .= " ORDER BY `DISABILITAS FISIK DAN MENTAL` DESC";
             break;
+        case 'fisik_mental_asc':
+            $sql .= " ORDER BY `DISABILITAS FISIK DAN MENTAL` ASC";
+            break;
         case 'lainnya_desc':
             $sql .= " ORDER BY `DISABILITAS LAINNYA` DESC";
+            break;
+        case 'lainnya_asc':
+            $sql .= " ORDER BY `DISABILITAS LAINNYA` ASC";
             break;
         default:
             $sql .= " ORDER BY TOTAL DESC";
